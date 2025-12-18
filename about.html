@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About MilkoSense - AI-Assisted Milk Quality Testing System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .tech-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .tech-card:hover {
+            transform: translateY(-4px);
+            border-color: #2563eb;
+            box-shadow: 0 20px 40px rgba(37, 99, 235, 0.1);
+        }
+        .sensor-icon {
+            background: linear-gradient(135deg, #2563eb, #3b82f6);
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+        }
+        .workflow-step {
+            position: relative;
+        }
+        .workflow-step::after {
+            content: '→';
+            position: absolute;
+            right: -2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 2rem;
+            color: #2563eb;
+            font-weight: bold;
+        }
+        .workflow-step:last-child::after {
+            display: none;
+        }
+        .benefit-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            transition: all 0.3s ease;
+        }
+        .benefit-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body class="bg-white text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link active text-gray-900 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link text-gray-600 font-medium">Dashboard</a>
+                    <a href="recommendations.html" class="nav-link text-gray-600 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link text-gray-600 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                About <span class="text-blue-600">MilkoSense</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Revolutionary AI-powered milk quality testing system that combines advanced sensor technology 
+                with machine learning to ensure the highest standards of dairy safety and purity.
+            </p>
+        </div>
+    </section>
+
+    <!-- System Overview -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-20">
+                <div>
+                    <h2 class="text-4xl font-bold text-gray-900 mb-6">What is MilkoSense?</h2>
+                    <p class="text-lg text-gray-600 mb-6 leading-relaxed">
+                        MilkoSense is an innovative IoT-based system designed to address the critical challenges 
+                        of milk quality assessment in the dairy industry. By leveraging advanced sensor technology 
+                        and artificial intelligence, our system provides accurate, real-time analysis of milk 
+                        quality parameters.
+                    </p>
+                    <p class="text-lg text-gray-600 mb-8 leading-relaxed">
+                        The system integrates multiple sensors including pH, temperature, turbidity, TDS, and gas 
+                        sensors to comprehensively evaluate milk quality. Machine learning algorithms analyze this 
+                        data to detect adulteration, predict spoilage, and classify milk quality grades with 
+                        remarkable accuracy.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span class="text-gray-700 font-medium">99% Accuracy</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span class="text-gray-700 font-medium">Real-Time Analysis</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-purple-500 rounded-full"></div>
+                            <span class="text-gray-700 font-medium">IoT Integration</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="relative">
+                    <img src="resources/hero-milko.jpg" alt="MilkoSense System Overview" class="w-full h-auto rounded-2xl shadow-2xl">
+                    <div class="absolute -bottom-6 -right-6 bg-white p-4 rounded-xl shadow-lg">
+                        <div class="text-2xl font-bold text-blue-600">Grade A</div>
+                        <div class="text-sm text-gray-600">Quality Rating</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Problems Solved -->
+    <section class="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Problems We Solve</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Addressing critical challenges in milk quality assessment that affect consumer safety and dairy industry standards.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="benefit-card">
+                    <div class="w-16 h-16 bg-red-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Adulteration Detection</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Rapid identification of harmful adulterants like urea, detergent, starch, and formalin that pose serious health risks to consumers.
+                    </p>
+                </div>
+                <div class="benefit-card">
+                    <div class="w-16 h-16 bg-orange-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Spoilage Prevention</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Early detection of microbial contamination and spoilage indicators, preventing distribution of unsafe milk products.
+                    </p>
+                </div>
+                <div class="benefit-card">
+                    <div class="w-16 h-16 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Quality Inconsistency</h3>
+                    <p class="text-gray-600 leading-relaxed">
+                        Standardized quality assessment eliminating human error and subjective evaluation methods in milk quality testing.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sensor Technology -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Sensor Technology</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Advanced multi-parameter sensor array providing comprehensive milk quality analysis with scientific precision.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-8">
+                <!-- pH Sensor -->
+                <div class="tech-card bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <img src="resources/sensor-ph.jpg" alt="pH Sensor" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">pH Sensor</h3>
+                    <p class="text-sm text-gray-600 mb-3">Measures acidity/alkalinity levels</p>
+                    <div class="text-xs text-gray-500">
+                        <div>Range: 6.0 - 7.0</div>
+                        <div>Optimal: 6.4 - 6.8</div>
+                    </div>
+                </div>
+
+                <!-- Temperature Sensor -->
+                <div class="tech-card bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <img src="resources/sensor-temp.jpg" alt="Temperature Sensor" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Temperature Sensor</h3>
+                    <p class="text-sm text-gray-600 mb-3">Monitors thermal conditions</p>
+                    <div class="text-xs text-gray-500">
+                        <div>Range: 0°C - 50°C</div>
+                        <div>Optimal: 15°C - 20°C</div>
+                    </div>
+                </div>
+
+                <!-- Turbidity Sensor -->
+                <div class="tech-card bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <img src="resources/sensor-turbidity.jpg" alt="Turbidity Sensor" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Turbidity Sensor</h3>
+                    <p class="text-sm text-gray-600 mb-3">Detects cloudiness/particles</p>
+                    <div class="text-xs text-gray-500">
+                        <div>Range: 0 - 100 NTU</div>
+                        <div>Optimal: 10 - 20 NTU</div>
+                    </div>
+                </div>
+
+                <!-- TDS Sensor -->
+                <div class="tech-card bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <img src="resources/sensor-tds.jpg" alt="TDS Sensor" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">TDS Sensor</h3>
+                    <p class="text-sm text-gray-600 mb-3">Measures dissolved solids</p>
+                    <div class="text-xs text-gray-500">
+                        <div>Range: 0 - 2000 ppm</div>
+                        <div>Optimal: 800 - 1200 ppm</div>
+                    </div>
+                </div>
+
+                <!-- Gas Sensor -->
+                <div class="tech-card bg-white p-6 rounded-2xl shadow-lg text-center">
+                    <img src="resources/sensor-gas.jpg" alt="Gas Sensor" class="w-full h-32 object-cover rounded-lg mb-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Gas Sensor</h3>
+                    <p class="text-sm text-gray-600 mb-3">Detects volatile compounds</p>
+                    <div class="text-xs text-gray-500">
+                        <div>Type: MQ135</div>
+                        <div>Detects: NH₃, NOx, alcohol</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI & IoT Integration -->
+    <section class="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">AI & IoT Integration</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Seamless integration of artificial intelligence and Internet of Things for intelligent milk quality monitoring.
+                </p>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-16">
+                <div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-6">Artificial Intelligence</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Random Forest Algorithm</h4>
+                                <p class="text-gray-600">Advanced ensemble learning method achieving 99% accuracy in milk quality classification.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Real-Time Analysis</h4>
+                                <p class="text-gray-600">Instant processing of sensor data with immediate quality assessment and alerts.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Predictive Analytics</h4>
+                                <p class="text-gray-600">Machine learning models predict spoilage and quality degradation patterns.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">AI Processing Pipeline</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg">
+                            <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm font-bold">1</div>
+                            <span class="text-gray-700">Sensor Data Collection</span>
+                        </div>
+                        <div class="flex items-center space-x-4 p-4 bg-green-50 rounded-lg">
+                            <div class="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center text-sm font-bold">2</div>
+                            <span class="text-gray-700">Feature Extraction</span>
+                        </div>
+                        <div class="flex items-center space-x-4 p-4 bg-yellow-50 rounded-lg">
+                            <div class="w-8 h-8 bg-yellow-600 text-white rounded-full flex items-center justify-center text-sm font-bold">3</div>
+                            <span class="text-gray-700">ML Classification</span>
+                        </div>
+                        <div class="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg">
+                            <div class="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center text-sm font-bold">4</div>
+                            <span class="text-gray-700">Quality Assessment</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="bg-white p-8 rounded-2xl shadow-xl">
+                    <h4 class="text-xl font-bold text-gray-900 mb-4">IoT Architecture</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">ESP32 Controller</span>
+                            <span class="text-sm text-green-600 font-medium">Connected</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">Sensor Array</span>
+                            <span class="text-sm text-green-600 font-medium">Active</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">Cloud Platform</span>
+                            <span class="text-sm text-green-600 font-medium">Online</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <span class="text-gray-700">Mobile App</span>
+                            <span class="text-sm text-green-600 font-medium">Synced</span>
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <h3 class="text-3xl font-bold text-gray-900 mb-6">Internet of Things</h3>
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">ESP32 Integration</h4>
+                                <p class="text-gray-600">Powerful microcontroller with built-in WiFi and Bluetooth for seamless connectivity.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Real-Time Monitoring</h4>
+                                <p class="text-gray-600">Continuous data collection and transmission to cloud platforms for instant analysis.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-4">
+                            <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-1">
+                                <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM9 7H4l5-5v5zm6 10V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2h6a2 2 0 002-2z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Cloud Integration</h4>
+                                <p class="text-gray-600">Secure data storage and processing with remote access and alert notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quality Parameters -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Quality Standards</h2>
+                <p class="text-xl text-gray-600 max-w-3xl mx-auto">
+                    Industry-standard quality parameters and thresholds for comprehensive milk quality assessment.
+                </p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-green-600">A</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Grade A (Excellent)</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">pH Level:</span>
+                            <span class="font-medium">6.5 - 6.7</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Temperature:</span>
+                            <span class="font-medium">15°C - 20°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Turbidity:</span>
+                            <span class="font-medium">10 - 15 NTU</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">TDS:</span>
+                            <span class="font-medium">800 - 1000 ppm</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-3 bg-green-50 rounded-lg">
+                        <p class="text-xs text-green-800 text-center">Premium quality milk suitable for direct consumption</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-blue-600">B</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Grade B (Good)</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">pH Level:</span>
+                            <span class="font-medium">6.4 - 6.5</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Temperature:</span>
+                            <span class="font-medium">10°C - 25°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Turbidity:</span>
+                            <span class="font-medium">15 - 20 NTU</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">TDS:</span>
+                            <span class="font-medium">700 - 1200 ppm</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-3 bg-blue-50 rounded-lg">
+                        <p class="text-xs text-blue-800 text-center">Good quality milk for processing</p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-200">
+                    <div class="text-center mb-6">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-2xl font-bold text-yellow-600">C</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900 mb-2">Grade C (Fair)</h3>
+                    </div>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">pH Level:</span>
+                            <span class="font-medium">6.2 - 6.4</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Temperature:</span>
+                            <span class="font-medium">5°C - 30°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Turbidity:</span>
+                            <span class="font-medium">20 - 25 NTU</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">TDS:</span>
+                            <span class="font-medium">600 - 1400 ppm</span>
+                        </div>
+                    </div>
+                    <div class="mt-6 p-3 bg-yellow-50 rounded-lg">
+                        <p class="text-xs text-yellow-800 text-center">Requires treatment before use</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-20 bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-4xl font-bold text-white mb-6">Experience the Technology</h2>
+            <p class="text-xl text-blue-100 mb-8 leading-relaxed">
+                Explore our interactive prototype to see how MilkoSense revolutionizes milk quality testing 
+                with advanced sensors and AI-powered analysis.
+            </p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="sensors.html" class="inline-flex items-center justify-center px-8 py-4 bg-white text-blue-600 font-semibold rounded-xl hover:bg-gray-100 transition-all duration-300 shadow-lg">
+                    Try Sensor Input
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+                <a href="dashboard.html" class="inline-flex items-center justify-center px-8 py-4 border-2 border-white text-white font-semibold rounded-xl hover:bg-white/10 transition-all duration-300">
+                    View Live Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>

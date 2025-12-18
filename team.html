@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .team-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .team-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-color: #2563eb;
+        }
+        .avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .team-card:hover .avatar {
+            border-color: #2563eb;
+            transform: scale(1.05);
+        }
+        .role-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .role-lead {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .role-developer {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        .role-designer {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        .role-researcher {
+            background-color: #fce7f3;
+            color: #be185d;
+        }
+        .contribution-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background-color: #f3f4f6;
+            color: #374151;
+            border-radius: 0.375rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin: 0.25rem;
+        }
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 2.5rem;
+            height: 2.5rem;
+            background-color: #f3f4f6;
+            color: #6b7280;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        .social-link:hover {
+            background-color: #2563eb;
+            color: white;
+            transform: translateY(-2px);
+        }
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0.5rem;
+            width: 0.75rem;
+            height: 0.75rem;
+            background-color: #2563eb;
+            border-radius: 50%;
+        }
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 0.375rem;
+            top: 1.25rem;
+            width: 2px;
+            height: calc(100% - 1.25rem);
+            background-color: #e2e8f0;
+        }
+        .timeline-item:last-child::after {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link text-gray-600 font-medium">Dashboard</a>
+                    <a href="recommendations.html" class="nav-link text-gray-600 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link active text-gray-900 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                Meet the <span class="text-blue-600">Team</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                A dedicated group of students and faculty working together to revolutionize 
+                milk quality testing through innovative technology and scientific excellence.
+            </p>
+        </div>
+    </section>
+
+    <!-- Team Members -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Project Team</h2>
+                <p class="text-xl text-gray-600">The brilliant minds behind MilkoSense</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+                <!-- Team Member 1 - Project Lead -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="Project Lead" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-lead mx-auto">Project Lead</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Alex Johnson</h3>
+                    <p class="text-gray-600 mb-4">Computer Engineering Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Leading the technical development and system integration. Specializes in IoT systems 
+                        and embedded programming with expertise in ESP32 microcontrollers.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">System Architecture</span>
+                        <span class="contribution-badge">IoT Integration</span>
+                        <span class="contribution-badge">ESP32 Programming</span>
+                        <span class="contribution-badge">Team Coordination</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 2 - AI Developer -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="AI Developer" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-developer mx-auto">AI Developer</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Sarah Chen</h3>
+                    <p class="text-gray-600 mb-4">Computer Science Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Developing machine learning algorithms for milk quality classification. 
+                        Expert in Random Forest algorithms and data analysis with Python and TensorFlow.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">Machine Learning</span>
+                        <span class="contribution-badge">Data Analysis</span>
+                        <span class="contribution-badge">Python Programming</span>
+                        <span class="contribution-badge">Model Training</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 3 - UI/UX Designer -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="UI/UX Designer" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-designer mx-auto">UI/UX Designer</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Maya Patel</h3>
+                    <p class="text-gray-600 mb-4">Design Engineering Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Creating intuitive user interfaces and engaging user experiences. 
+                        Specializes in interaction design and visual communication for scientific applications.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">UI/UX Design</span>
+                        <span class="contribution-badge">Interaction Design</span>
+                        <span class="contribution-badge">Visual Design</span>
+                        <span class="contribution-badge">Prototyping</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.174-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.347-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.402.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.357-.629-2.75-1.378l-.748 2.853c-.271 1.043-1.002 2.35-1.492 3.146C9.57 23.812 10.763 24.009 12.017 24.009c6.624 0 11.99-5.367 11.99-11.988C24.007 5.367 18.641.001.017.001z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0C5.374 0 0 5.373 0 12s5.374 12 12 12 12-5.373 12-12S18.626 0 12 0zm5.568 8.16c-.169 1.858-.896 3.433-2.173 4.71C13.938 14.146 12.4 14.8 10.76 14.8c-.204 0-.41-.02-.615-.061-.169-.041-.296-.188-.296-.367v-5.04c0-.179.127-.326.296-.367.205-.041.41-.061.615-.061 1.64 0 3.178.654 4.635 1.93 1.277 1.277 2.004 2.852 2.173 4.71z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 4 - Research Analyst -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="Research Analyst" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-researcher mx-auto">Research Analyst</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">David Kim</h3>
+                    <p class="text-gray-600 mb-4">Food Technology Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Conducting research on milk quality standards and adulteration detection methods. 
+                        Expert in food safety protocols and quality assessment procedures.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">Research</span>
+                        <span class="contribution-badge">Quality Standards</span>
+                        <span class="contribution-badge">Food Safety</span>
+                        <span class="contribution-badge">Documentation</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 5 - Hardware Engineer -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="Hardware Engineer" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-developer mx-auto">Hardware Engineer</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Emma Rodriguez</h3>
+                    <p class="text-gray-600 mb-4">Electronics Engineering Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Designing and implementing the sensor hardware and circuit integration. 
+                        Expert in PCB design and sensor calibration for accurate measurements.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">Hardware Design</span>
+                        <span class="contribution-badge">PCB Layout</span>
+                        <span class="contribution-badge">Sensor Integration</span>
+                        <span class="contribution-badge">Calibration</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Team Member 6 - Testing Specialist -->
+                <div class="team-card p-8 rounded-2xl text-center">
+                    <img src="resources/team-avatar.jpg" alt="Testing Specialist" class="avatar mx-auto mb-6">
+                    <div class="role-badge role-researcher mx-auto">Testing Specialist</div>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-2">Ryan Thompson</h3>
+                    <p class="text-gray-600 mb-4">Quality Assurance Student</p>
+                    <p class="text-sm text-gray-500 mb-6 leading-relaxed">
+                        Ensuring system reliability through comprehensive testing protocols. 
+                        Specializes in test automation and quality assurance methodologies.
+                    </p>
+                    <div class="mb-6">
+                        <span class="contribution-badge">Quality Assurance</span>
+                        <span class="contribution-badge">Test Automation</span>
+                        <span class="contribution-badge">Performance Testing</span>
+                        <span class="contribution-badge">Documentation</span>
+                    </div>
+                    <div class="flex justify-center space-x-3">
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </a>
+                        <a href="#" class="social-link">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Guide -->
+    <section class="py-20 bg-white px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Project Guide</h2>
+                <p class="text-xl text-gray-600">Our mentor and guide throughout this journey</p>
+            </div>
+            
+            <div class="team-card p-12 rounded-2xl text-center">
+                <img src="resources/team-avatar.jpg" alt="Project Guide" class="avatar mx-auto mb-6" style="width: 150px; height: 150px;">
+                <div class="role-badge role-lead mx-auto" style="background-color: #fef3c7; color: #92400e;">Project Guide</div>
+                <h3 class="text-3xl font-bold text-gray-900 mb-2">Dr. Michael Stevens</h3>
+                <p class="text-xl text-gray-600 mb-4">Professor of Food Technology</p>
+                <p class="text-lg text-gray-500 mb-8 leading-relaxed max-w-2xl mx-auto">
+                    With over 15 years of experience in food safety and quality assurance, Dr. Stevens has been 
+                    instrumental in guiding our team through the complexities of milk quality assessment. His 
+                    expertise in dairy science and commitment to innovation has been invaluable to the project's success.
+                </p>
+                <div class="flex justify-center space-x-4">
+                    <a href="#" class="social-link" style="width: 3rem; height: 3rem;">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                        </svg>
+                    </a>
+                    <a href="#" class="social-link" style="width: 3rem; height: 3rem;">
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Timeline -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Project Timeline</h2>
+                <p class="text-xl text-gray-600">Our journey from concept to completion</p>
+            </div>
+            
+            <div class="space-y-8">
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Project Inception</h3>
+                            <span class="text-sm text-gray-500">January 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Initial concept development and problem identification. Team formation and role assignment 
+                            with guidance from Dr. Stevens.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Research & Planning</h3>
+                            <span class="text-sm text-gray-500">February 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Comprehensive research on milk quality standards, sensor technologies, and existing solutions. 
+                            Technical feasibility analysis and project planning.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Hardware Development</h3>
+                            <span class="text-sm text-gray-500">March - April 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            ESP32-based sensor array development and calibration. Circuit design, PCB layout, 
+                            and sensor integration with extensive testing protocols.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">AI Model Development</h3>
+                            <span class="text-sm text-gray-500">May - June 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Machine learning algorithm development using Random Forest. Model training, validation, 
+                            and optimization for accurate milk quality classification.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Web Application Development</h3>
+                            <span class="text-sm text-gray-500">July - August 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Interactive web prototype development with real-time dashboard, data visualization, 
+                            and user-friendly interfaces for all system components.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Testing & Validation</h3>
+                            <span class="text-sm text-gray-500">September 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Comprehensive system testing, performance validation, and accuracy verification. 
+                            Field testing with real milk samples and quality assessment.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold text-gray-900">Project Completion</h3>
+                            <span class="text-sm text-gray-500">November 2025</span>
+                        </div>
+                        <p class="text-gray-600">
+                            Final presentation, documentation completion, and project delivery. Successfully 
+                            demonstrated 99% accuracy in milk quality classification.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Institute Logo -->
+    <section class="py-16 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h3 class="text-2xl font-bold text-gray-900 mb-8">In Collaboration With</h3>
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <div class="w-24 h-24 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white font-bold text-2xl">TI</span>
+                </div>
+                <h4 class="text-xl font-bold text-gray-900 mb-2">Tech Institute</h4>
+                <p class="text-gray-600">Department of Food Technology & Engineering</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize team page animations
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTeamAnimations();
+        });
+
+        function initializeTeamAnimations() {
+            // Animate team cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        anime({
+                            targets: entry.target,
+                            translateY: [50, 0],
+                            opacity: [0, 1],
+                            duration: 800,
+                            easing: 'easeOutQuart'
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            // Observe team cards
+            document.querySelectorAll('.team-card').forEach(card => {
+                observer.observe(card);
+            });
+
+            // Animate timeline items
+            const timelineObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        anime({
+                            targets: entry.target,
+                            translateX: [-50, 0],
+                            opacity: [0, 1],
+                            duration: 800,
+                            easing: 'easeOutQuart'
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.timeline-item').forEach(item => {
+                timelineObserver.observe(item);
+            });
+
+            // Animate contribution badges
+            const badgeObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const badges = entry.target.querySelectorAll('.contribution-badge');
+                        anime({
+                            targets: badges,
+                            scale: [0, 1],
+                            opacity: [0, 1],
+                            duration: 600,
+                            delay: anime.stagger(100),
+                            easing: 'easeOutElastic(1, .8)'
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.team-card').forEach(card => {
+                badgeObserver.observe(card);
+            });
+        }
+    </script>
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>

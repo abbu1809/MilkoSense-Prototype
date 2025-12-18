@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recommendations - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .recommendation-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .recommendation-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-4px);
+            box-shadow: 0 15px 35px rgba(37, 99, 235, 0.1);
+        }
+        .ai-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1rem;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        /* Dark Mode Styles */
+        [data-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
+        [data-theme="dark"] .bg-white { background-color: #1e293b; }
+        [data-theme="dark"] .bg-gray-50 { background-color: #0f172a; }
+        [data-theme="dark"] .bg-gray-100 { background-color: #1e293b; }
+        [data-theme="dark"] .text-gray-900 { color: #e2e8f0; }
+        [data-theme="dark"] .text-gray-600 { color: #94a3b8; }
+        [data-theme="dark"] nav { background-color: rgba(15, 23, 42, 0.9); border-color: #334155; }
+        [data-theme="dark"] .border-gray-200 { border-color: #334155; }
+        [data-theme="dark"] .recommendation-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); border-color: #334155; }
+        [data-theme="dark"] .bg-gradient-to-br.from-blue-50.to-white { background: linear-gradient(to bottom right, #1e293b, #0f172a); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="realtime-dashboard.html" class="nav-link text-gray-600 font-medium">Real-Time</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link text-gray-600 font-medium">Dashboard</a>
+                    <a href="recommendations.html" class="nav-link active text-gray-900 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link text-gray-600 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                Recommended Changes to <span class="text-blue-600">Improve Milk Quality</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                AI-generated personalized recommendations based on your milk quality analysis. 
+                These suggestions are tailored to help you achieve optimal milk quality standards.
+            </p>
+        </div>
+    </section>
+
+    <!-- Diet Recommendations -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="recommendation-card p-8 rounded-2xl mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-green-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">Diet Recommendations</h2>
+                            <p class="text-gray-600">Optimize cattle nutrition for better milk quality</p>
+                        </div>
+                    </div>
+                    <div class="ai-badge">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI-Generated
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-green-900 mb-4">Increase Protein Intake</h3>
+                        <ul class="space-y-3 text-green-800">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">✓</span>
+                                <span>Add high-quality protein sources like soybean meal, groundnut cake, or cottonseed meal to feed</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">✓</span>
+                                <span>Target 18-20% crude protein in total feed ration</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">✓</span>
+                                <span>Provide 2-3 kg of protein-rich concentrate per day per animal</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4">Enhance Mineral Supplementation</h3>
+                        <ul class="space-y-3 text-blue-800">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">✓</span>
+                                <span>Provide mineral mixture containing calcium, phosphorus, and trace minerals</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">✓</span>
+                                <span>Ensure adequate salt (sodium chloride) intake for proper metabolism</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">✓</span>
+                                <span>Add 50-100g of mineral mixture per day to feed</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-yellow-900 mb-4">Improve Feed Quality</h3>
+                        <ul class="space-y-3 text-yellow-800">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-yellow-600 mt-1">✓</span>
+                                <span>Include high-quality green fodder (maize, sorghum, or leguminous crops)</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-yellow-600 mt-1">✓</span>
+                                <span>Ensure feed is fresh, free from mold, and properly stored</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-yellow-600 mt-1">✓</span>
+                                <span>Maintain 60:40 ratio of roughage to concentrate in diet</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-purple-900 mb-4">Hydration Management</h3>
+                        <ul class="space-y-3 text-purple-800">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">✓</span>
+                                <span>Ensure clean, fresh water is available at all times</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">✓</span>
+                                <span>Provide 3-5 liters of water per kg of milk produced</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">✓</span>
+                                <span>Water temperature should be cool (15-20°C) for better consumption</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Environmental Improvements -->
+    <section class="py-20 bg-white px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="recommendation-card p-8 rounded-2xl mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">Environmental Improvements</h2>
+                            <p class="text-gray-600">Create optimal conditions for milk production and storage</p>
+                        </div>
+                    </div>
+                    <div class="ai-badge">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI-Generated
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4">Ideal Temperature Range</h3>
+                        <div class="space-y-3 text-blue-800">
+                            <div class="flex items-center space-x-2">
+                                <span class="text-2xl font-bold text-blue-600">15-20°C</span>
+                            </div>
+                            <ul class="space-y-2 text-sm">
+                                <li>• Maintain milking area temperature between 15-20°C</li>
+                                <li>• Store milk immediately at 4°C or below</li>
+                                <li>• Use temperature-controlled storage facilities</li>
+                                <li>• Monitor temperature continuously with IoT sensors</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-green-900 mb-4">Shelter Cleanliness & Humidity</h3>
+                        <ul class="space-y-3 text-green-800 text-sm">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Maintain 50-70% relative humidity in cattle shelter</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Ensure proper ventilation to prevent moisture buildup</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Clean cattle housing daily to prevent contamination</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Use dry bedding material and replace regularly</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-purple-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-purple-900 mb-4">Milking Hygiene</h3>
+                        <ul class="space-y-3 text-purple-800 text-sm">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">•</span>
+                                <span>Wash udder and teats with clean water before milking</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">•</span>
+                                <span>Use sanitized milking equipment and containers</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">•</span>
+                                <span>Wear clean clothing and maintain personal hygiene</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-purple-600 mt-1">•</span>
+                                <span>Filter milk immediately after collection</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Cattle Management Tips -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="recommendation-card p-8 rounded-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900">Cattle Management Tips</h2>
+                            <p class="text-gray-600">Best practices for maintaining healthy, productive cattle</p>
+                        </div>
+                    </div>
+                    <div class="ai-badge">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI-Generated
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-red-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-red-900 mb-4">Stress Reduction</h3>
+                        <ul class="space-y-3 text-red-800 text-sm">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-red-600 mt-1">•</span>
+                                <span>Provide comfortable resting areas with adequate space (at least 2.5 sq meters per animal)</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-red-600 mt-1">•</span>
+                                <span>Avoid sudden changes in routine or environment</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-red-600 mt-1">•</span>
+                                <span>Handle cattle gently and minimize loud noises</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-red-600 mt-1">•</span>
+                                <span>Ensure proper social interaction with herd members</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-red-600 mt-1">•</span>
+                                <span>Provide shade and protection from extreme weather</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-blue-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-blue-900 mb-4">Vaccination</h3>
+                        <ul class="space-y-3 text-blue-800 text-sm">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">•</span>
+                                <span>Follow recommended vaccination schedule for common diseases (FMD, Brucellosis, etc.)</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">•</span>
+                                <span>Maintain vaccination records and consult with veterinarian</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">•</span>
+                                <span>Vaccinate new animals before introducing to herd</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-blue-600 mt-1">•</span>
+                                <span>Monitor for adverse reactions and report to veterinarian</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 p-6 rounded-xl">
+                        <h3 class="text-xl font-bold text-green-900 mb-4">Health Monitoring</h3>
+                        <ul class="space-y-3 text-green-800 text-sm">
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Conduct regular health checkups and body condition scoring</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Monitor milk production patterns and quality indicators</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Check for signs of mastitis, lameness, or other health issues</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Maintain health records and track trends over time</span>
+                            </li>
+                            <li class="flex items-start space-x-2">
+                                <span class="text-green-600 mt-1">•</span>
+                                <span>Implement regular deworming and parasite control programs</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impact Visualization -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Expected Impact Analysis</h2>
+                <p class="text-xl text-gray-600">AI-powered predictions showing potential quality improvements</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <!-- Quality Improvement Projection -->
+                <div class="recommendation-card p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Quality Score Projection</h3>
+                    <div id="quality-projection-chart" style="height: 300px;"></div>
+                </div>
+                
+                <!-- Recommendation Impact Chart -->
+                <div class="recommendation-card p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Recommendation Impact</h3>
+                    <div id="impact-chart" style="height: 300px;"></div>
+                </div>
+            </div>
+            
+            <!-- Parameter Improvement Chart -->
+            <div class="recommendation-card p-6 rounded-2xl">
+                <h3 class="text-xl font-bold text-gray-900 mb-6">Parameter Improvement Forecast</h3>
+                <div id="parameter-improvement-chart" style="height: 350px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="py-16 bg-white px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">Continue Your Journey</h2>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="analysis.html" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-lg">
+                    Back to Analysis
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                    </svg>
+                </a>
+                <a href="sensors.html" class="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300">
+                    Run New Analysis
+                </a>
+                <a href="dashboard.html" class="inline-flex items-center justify-center px-8 py-4 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all duration-300">
+                    View Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize recommendations page
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeRecommendations();
+        });
+
+        function initializeRecommendations() {
+            // Animate recommendation cards on scroll
+            const observerOptions = {
+                threshold: 0.1,
+                rootMargin: '0px 0px -50px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        anime({
+                            targets: entry.target,
+                            translateY: [50, 0],
+                            opacity: [0, 1],
+                            duration: 800,
+                            easing: 'easeOutQuart'
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            // Observe recommendation cards
+            document.querySelectorAll('.recommendation-card').forEach(card => {
+                observer.observe(card);
+            });
+            
+            // Initialize charts
+            initializeRecommendationCharts();
+        }
+        
+        function initializeRecommendationCharts() {
+            // Quality Projection Chart
+            const projectionDom = document.getElementById('quality-projection-chart');
+            if (projectionDom) {
+                const projectionChart = echarts.init(projectionDom);
+                projectionChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: {
+                        data: ['Current', 'With Recommendations'],
+                        bottom: 0
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '15%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['Week 1', 'Week 2', 'Week 3', 'Week 4']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Quality Score',
+                        max: 100
+                    },
+                    series: [
+                        {
+                            name: 'Current',
+                            type: 'line',
+                            data: [85, 86, 87, 88],
+                            itemStyle: { color: '#94a3b8' },
+                            lineStyle: { type: 'dashed' }
+                        },
+                        {
+                            name: 'With Recommendations',
+                            type: 'line',
+                            data: [85, 88, 91, 94],
+                            itemStyle: { color: '#10b981' },
+                            areaStyle: { opacity: 0.3 }
+                        }
+                    ]
+                });
+            }
+            
+            // Impact Chart
+            const impactDom = document.getElementById('impact-chart');
+            if (impactDom) {
+                const impactChart = echarts.init(impactDom);
+                impactChart.setOption({
+                    tooltip: { trigger: 'item' },
+                    legend: {
+                        orient: 'vertical',
+                        left: 'left',
+                        bottom: 0
+                    },
+                    series: [{
+                        name: 'Impact',
+                        type: 'pie',
+                        radius: '60%',
+                        data: [
+                            { value: 35, name: 'Diet Changes', itemStyle: { color: '#10b981' } },
+                            { value: 30, name: 'Environment', itemStyle: { color: '#3b82f6' } },
+                            { value: 25, name: 'Management', itemStyle: { color: '#f59e0b' } },
+                            { value: 10, name: 'Other', itemStyle: { color: '#8b5cf6' } }
+                        ],
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowOffsetX: 0,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }]
+                });
+            }
+            
+            // Parameter Improvement Chart
+            const paramDom = document.getElementById('parameter-improvement-chart');
+            if (paramDom) {
+                const paramChart = echarts.init(paramDom);
+                paramChart.setOption({
+                    tooltip: { trigger: 'axis' },
+                    legend: {
+                        data: ['Before', 'After Recommendations'],
+                        bottom: 0
+                    },
+                    grid: {
+                        left: '3%',
+                        right: '4%',
+                        bottom: '15%',
+                        containLabel: true
+                    },
+                    xAxis: {
+                        type: 'category',
+                        data: ['pH', 'Temperature', 'Turbidity', 'TDS', 'Gas']
+                    },
+                    yAxis: {
+                        type: 'value',
+                        name: 'Score'
+                    },
+                    series: [
+                        {
+                            name: 'Before',
+                            type: 'bar',
+                            data: [75, 80, 70, 78, 82],
+                            itemStyle: { color: '#94a3b8' }
+                        },
+                        {
+                            name: 'After Recommendations',
+                            type: 'bar',
+                            data: [88, 92, 85, 90, 88],
+                            itemStyle: { color: '#10b981' }
+                        }
+                    ]
+                });
+            }
+            
+            // Make charts responsive
+            window.addEventListener('resize', () => {
+                if (projectionDom) projectionChart.resize();
+                if (impactDom) impactChart.resize();
+                if (paramDom) paramChart.resize();
+            });
+        }
+    </script>
+    <script src="ai-analysis.js"></script>
+    <script src="dynamic-loader.js"></script>
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>
+

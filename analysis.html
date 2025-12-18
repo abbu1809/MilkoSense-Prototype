@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Analysis Results - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .result-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .result-card:hover {
+            border-color: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(37, 99, 235, 0.1);
+        }
+        .grade-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto;
+        }
+        .grade-a { background: linear-gradient(135deg, #10b981, #059669); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .alert-banner {
+            animation: slideInDown 0.5s ease-out;
+        }
+        @keyframes slideInDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .parameter-gauge {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            margin: 0 auto;
+        }
+        .gauge-bg {
+            stroke: #e2e8f0;
+            stroke-width: 12;
+            fill: none;
+        }
+        .gauge-fill {
+            stroke-width: 12;
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dasharray 1s ease;
+        }
+        .spoilage-timer {
+            background: linear-gradient(135deg, #fef3c7, #fbbf24);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .microbial-level {
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        .microbial-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 1s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="analysis.html" class="nav-link active text-gray-900 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link text-gray-600 font-medium">Dashboard</a>
+                    <a href="analysis-dashboard.html" class="nav-link text-gray-600 font-medium">Analysis Dashboard</a>
+                    <a href="recommendations.html" class="nav-link text-gray-600 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link text-gray-600 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner fixed top-16 left-0 right-0 bg-red-500 text-white p-4 z-40 hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <span class="font-semibold">Quality Alert: Adulteration Detected!</span>
+            </div>
+            <button onclick="dismissAlert()" class="text-white hover:text-gray-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto text-center">
+            <h1 class="text-5xl font-bold text-gray-900 mb-6">
+                AI Analysis <span class="text-blue-600">Results</span>
+            </h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+                Comprehensive milk quality assessment based on sensor data and machine learning analysis.
+            </p>
+        </div>
+    </section>
+
+    <!-- Quality Grade Section -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="result-card p-12 rounded-2xl text-center mb-12">
+                <div class="grade-badge grade-a mb-6" id="grade-badge">A</div>
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Quality Grade: <span id="grade-text">Excellent</span></h2>
+                <p class="text-xl text-gray-600 mb-8">
+                    Your milk sample meets the highest quality standards with exceptional purity and freshness.
+                </p>
+                <div class="grid md:grid-cols-4 gap-6 text-center">
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <div class="text-2xl font-bold text-green-600" id="overall-score">92</div>
+                        <div class="text-sm text-gray-600">Overall Score</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <div class="text-2xl font-bold text-blue-600" id="confidence-level">99.2</div>
+                        <div class="text-sm text-gray-600">Confidence %</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <div class="text-2xl font-bold text-purple-600" id="analysis-time">2.3</div>
+                        <div class="text-sm text-gray-600">Analysis Time (s)</div>
+                    </div>
+                    <div class="bg-white p-4 rounded-xl shadow-sm">
+                        <div class="text-2xl font-bold text-orange-600" id="parameters-tested">5</div>
+                        <div class="text-sm text-gray-600">Parameters</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Detailed Analysis -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Detailed Parameter Analysis</h2>
+                <p class="text-xl text-gray-600">Individual sensor readings and their impact on overall quality assessment</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-12 mb-16">
+                <!-- Parameter Gauges -->
+                <div class="space-y-8">
+                    <!-- pH Gauge -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="grid grid-cols-3 gap-6 items-center">
+                            <div class="text-center">
+                                <div class="parameter-gauge">
+                                    <svg class="w-full h-full transform -rotate-90">
+                                        <circle cx="75" cy="75" r="60" class="gauge-bg"></circle>
+                                        <circle cx="75" cy="75" r="60" class="gauge-fill" 
+                                                stroke="#10b981" stroke-dasharray="113 377" 
+                                                id="ph-gauge"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-gray-900" id="ph-reading">6.7</div>
+                                            <div class="text-xs text-gray-500">pH</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">pH Level</h3>
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-green-700">Optimal</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    pH level is within the ideal range for fresh milk, indicating proper acidity 
+                                    and absence of significant bacterial contamination.
+                                </p>
+                                <div class="text-xs text-gray-500">
+                                    <div>Normal Range: 6.4 - 6.8</div>
+                                    <div>Impact on Quality: +15 points</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Temperature Gauge -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="grid grid-cols-3 gap-6 items-center">
+                            <div class="text-center">
+                                <div class="parameter-gauge">
+                                    <svg class="w-full h-full transform -rotate-90">
+                                        <circle cx="75" cy="75" r="60" class="gauge-bg"></circle>
+                                        <circle cx="75" cy="75" r="60" class="gauge-fill" 
+                                                stroke="#3b82f6" stroke-dasharray="108 377" 
+                                                id="temp-gauge"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-gray-900" id="temp-reading">18.5</div>
+                                            <div class="text-xs text-gray-500">°C</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Temperature</h3>
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-blue-700">Ideal</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    Temperature is perfectly maintained within the optimal storage range, 
+                                    preventing bacterial growth and enzymatic degradation.
+                                </p>
+                                <div class="text-xs text-gray-500">
+                                    <div>Optimal Range: 15°C - 20°C</div>
+                                    <div>Impact on Quality: +18 points</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Turbidity Gauge -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg">
+                        <div class="grid grid-cols-3 gap-6 items-center">
+                            <div class="text-center">
+                                <div class="parameter-gauge">
+                                    <svg class="w-full h-full transform -rotate-90">
+                                        <circle cx="75" cy="75" r="60" class="gauge-bg"></circle>
+                                        <circle cx="75" cy="75" r="60" class="gauge-fill" 
+                                                stroke="#f59e0b" stroke-dasharray="95 377" 
+                                                id="turbidity-gauge"></circle>
+                                    </svg>
+                                    <div class="absolute inset-0 flex items-center justify-center">
+                                        <div class="text-center">
+                                            <div class="text-2xl font-bold text-gray-900" id="turbidity-reading">15.2</div>
+                                            <div class="text-xs text-gray-500">NTU</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-span-2">
+                                <h3 class="text-xl font-bold text-gray-900 mb-2">Turbidity</h3>
+                                <div class="flex items-center space-x-2 mb-2">
+                                    <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                    <span class="text-sm font-medium text-yellow-700">Normal</span>
+                                </div>
+                                <p class="text-gray-600 text-sm mb-3">
+                                    Turbidity levels are within acceptable limits, indicating minimal suspended 
+                                    particles and good filtration quality.
+                                </p>
+                                <div class="text-xs text-gray-500">
+                                    <div>Normal Range: 10 - 20 NTU</div>
+                                    <div>Impact on Quality: +12 points</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="space-y-8">
+                    <!-- Quality Chart -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Quality Parameter Trends</h3>
+                        <div id="quality-chart" style="height: 300px;"></div>
+                    </div>
+
+                    <!-- Radar Chart -->
+                    <div class="bg-white p-6 rounded-2xl shadow-lg">
+                        <h3 class="text-xl font-bold text-gray-900 mb-4">Quality Assessment Radar</h3>
+                        <div id="parameter-chart" style="height: 300px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Safety Analysis -->
+    <section class="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Safety & Contamination Analysis</h2>
+                <p class="text-xl text-gray-600">Advanced detection of potential adulterants and microbial contamination</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-3 gap-8 mb-12">
+                <!-- Microbial Contamination -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Microbial Contamination</h3>
+                    <div class="microbial-level mb-4">
+                        <div class="microbial-fill bg-green-500" style="width: 15%;"></div>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2">15%</div>
+                    <p class="text-sm text-gray-600 mb-4">Very Low Risk</p>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-green-800 text-sm">
+                            Minimal microbial activity detected. Milk is safe for consumption with excellent shelf life.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Spoilage Prediction -->
+                <div class="spoilage-timer">
+                    <h3 class="text-xl font-bold text-yellow-900 mb-4">Spoilage Prediction</h3>
+                    <div class="text-4xl font-bold text-yellow-900 mb-2" id="spoilage-timer">72h</div>
+                    <p class="text-yellow-800 mb-4">Estimated Fresh Duration</p>
+                    <div class="bg-yellow-100 p-4 rounded-lg">
+                        <p class="text-yellow-800 text-sm">
+                            Based on current parameters, milk will remain fresh for approximately 72 hours under proper refrigeration.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Adulteration Status -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg text-center">
+                    <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-4">Adulteration Status</h3>
+                    <div class="text-3xl font-bold text-green-600 mb-2">Clean</div>
+                    <p class="text-sm text-gray-600 mb-4">No Adulterants Detected</p>
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <p class="text-green-800 text-sm">
+                            Comprehensive analysis shows no evidence of urea, detergent, starch, or other common adulterants.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Adulterant Detection Grid -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">Adulterant Detection Results</h3>
+                <div class="grid md:grid-cols-5 gap-6">
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Urea</h4>
+                        <p class="text-sm text-green-700">Not Detected</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Detergent</h4>
+                        <p class="text-sm text-green-700">Not Detected</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Starch</h4>
+                        <p class="text-sm text-green-700">Not Detected</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Soda</h4>
+                        <p class="text-sm text-green-700">Not Detected</p>
+                    </div>
+                    <div class="text-center p-4 bg-green-50 rounded-xl">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h4 class="font-semibold text-gray-900 mb-1">Formalin</h4>
+                        <p class="text-sm text-green-700">Not Detected</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Context-Based Insights -->
+    <section class="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Context-Based Insights</h2>
+                <p class="text-xl text-gray-600">Personalized analysis based on cattle type and seasonal factors</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                <!-- Cattle Type Insights -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Cattle Type Analysis</h3>
+                    </div>
+                    <div id="cattle-insights" class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-blue-900 mb-2">Selected Type: <span id="cattle-type-display">Not Specified</span></h4>
+                            <p class="text-blue-800 text-sm" id="cattle-insight-text">
+                                Select a cattle type in the sensor input form to receive personalized insights about expected milk composition and quality parameters.
+                            </p>
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>Expected Fat Content:</span>
+                                <span class="font-medium" id="fat-content">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Protein Level:</span>
+                                <span class="font-medium" id="protein-level">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Lactose Content:</span>
+                                <span class="font-medium" id="lactose-content">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Seasonal Insights -->
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-gray-900">Seasonal Factors</h3>
+                    </div>
+                    <div id="season-insights" class="space-y-4">
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-green-900 mb-2">Current Season: <span id="season-display">Not Specified</span></h4>
+                            <p class="text-green-800 text-sm" id="season-insight-text">
+                                Select a season in the sensor input form to understand how environmental factors may affect milk quality.
+                            </p>
+                        </div>
+                        <div class="space-y-2 text-sm text-gray-600">
+                            <div class="flex justify-between">
+                                <span>Temperature Impact:</span>
+                                <span class="font-medium" id="temp-impact">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Humidity Effect:</span>
+                                <span class="font-medium" id="humidity-effect">-</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Feed Quality:</span>
+                                <span class="font-medium" id="feed-quality">-</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Factors Affecting Sensor Readings -->
+            <div class="bg-white p-8 rounded-2xl shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Factors Affecting Sensor Readings</h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="p-4 bg-blue-50 rounded-lg">
+                        <h4 class="font-semibold text-blue-900 mb-2">Environmental</h4>
+                        <ul class="text-sm text-blue-800 space-y-1">
+                            <li>• Ambient temperature</li>
+                            <li>• Storage conditions</li>
+                            <li>• Exposure time</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-green-50 rounded-lg">
+                        <h4 class="font-semibold text-green-900 mb-2">Biological</h4>
+                        <ul class="text-sm text-green-800 space-y-1">
+                            <li>• Cattle breed & health</li>
+                            <li>• Lactation stage</li>
+                            <li>• Feed composition</li>
+                        </ul>
+                    </div>
+                    <div class="p-4 bg-purple-50 rounded-lg">
+                        <h4 class="font-semibold text-purple-900 mb-2">Processing</h4>
+                        <ul class="text-sm text-purple-800 space-y-1">
+                            <li>• Milking hygiene</li>
+                            <li>• Time since milking</li>
+                            <li>• Handling procedures</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Quick Recommendations</h2>
+                <p class="text-xl text-gray-600">Expert recommendations based on your milk quality analysis</p>
+                <a href="recommendations.html" class="inline-flex items-center mt-4 text-blue-600 hover:text-blue-800 font-medium">
+                    View Detailed Recommendations
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Storage Recommendations</h3>
+                    </div>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-green-500 mt-1">•</span>
+                            <span>Maintain refrigeration at 4°C or below</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-green-500 mt-1">•</span>
+                            <span>Consume within 72 hours for optimal freshness</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-green-500 mt-1">•</span>
+                            <span>Store in clean, sealed containers</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-green-500 mt-1">•</span>
+                            <span>Avoid exposure to direct sunlight</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white p-8 rounded-2xl shadow-lg">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-bold text-gray-900">Quality Monitoring</h3>
+                    </div>
+                    <ul class="space-y-3 text-gray-600">
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-500 mt-1">•</span>
+                            <span>Continue regular quality testing</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-500 mt-1">•</span>
+                            <span>Monitor temperature consistently</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-500 mt-1">•</span>
+                            <span>Watch for any changes in odor or taste</span>
+                        </li>
+                        <li class="flex items-start space-x-2">
+                            <span class="text-blue-500 mt-1">•</span>
+                            <span>Implement IoT monitoring for continuous tracking</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Action Buttons -->
+    <section class="py-16 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-4xl mx-auto text-center">
+            <h2 class="text-3xl font-bold text-gray-900 mb-8">Next Steps</h2>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="dashboard.html" class="inline-flex items-center justify-center px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-lg">
+                    View Live Dashboard
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+                <a href="colorimetric.html" class="inline-flex items-center justify-center px-8 py-4 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all duration-300">
+                    Colorimetric Analysis
+                </a>
+                <button onclick="exportResults()" class="inline-flex items-center justify-center px-8 py-4 bg-gray-600 text-white font-semibold rounded-xl hover:bg-gray-700 transition-all duration-300">
+                    <svg class="mr-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Export Results
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize analysis results
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeAnalysisResults();
+            initializeCharts();
+            startSpoilageTimer();
+        });
+
+        async function initializeAnalysisResults() {
+            // Load AI analysis if available
+            const aiAnalysis = JSON.parse(localStorage.getItem('aiAnalysis') || '{}');
+            
+            // Animate grade badge
+            const qualityGrade = aiAnalysis.qualityGrade || { grade: 'A', score: 92, label: 'Excellent' };
+            const gradeElement = document.getElementById('grade-badge');
+            const gradeText = document.getElementById('grade-text');
+            
+            if (gradeElement) {
+                gradeElement.className = `grade-badge grade-${qualityGrade.grade.toLowerCase()}`;
+                gradeElement.textContent = qualityGrade.grade;
+            }
+            if (gradeText) {
+                gradeText.textContent = qualityGrade.label;
+            }
+            
+            anime({
+                targets: '#grade-badge',
+                scale: [0, 1],
+                rotate: [0, 360],
+                duration: 1000,
+                easing: 'easeOutElastic(1, .8)',
+                delay: 500
+            });
+
+            // Animate score counters with AI data
+            const confidence = aiAnalysis.confidence || 99.2;
+            animateCounter('overall-score', qualityGrade.score || 92);
+            animateCounter('confidence-level', confidence, 1);
+            animateCounter('analysis-time', 2.3, 1);
+
+            // Update spoilage prediction if available
+            if (aiAnalysis.spoilagePrediction) {
+                const spoilageTimer = document.getElementById('spoilage-timer');
+                if (spoilageTimer) {
+                    spoilageTimer.textContent = aiAnalysis.spoilagePrediction.hours + 'h';
+                }
+            }
+
+            // Load context-based insights
+            loadContextInsights();
+
+            // Show alert if quality is low or adulteration detected
+            setTimeout(() => {
+                if (qualityGrade.grade === 'D' || (aiAnalysis.adulterationRisk && aiAnalysis.adulterationRisk.detected)) {
+                    const alertBanner = document.getElementById('alert-banner');
+                    if (alertBanner) {
+                        alertBanner.classList.remove('hidden');
+                        if (aiAnalysis.adulterationRisk && aiAnalysis.adulterationRisk.detected) {
+                            alertBanner.querySelector('span').textContent = 'Quality Alert: ' + aiAnalysis.adulterationRisk.risks[0].message;
+                        }
+                    }
+                }
+            }, 2000);
+        }
+
+        function loadContextInsights() {
+            // Get stored sensor data
+            const sensorData = JSON.parse(localStorage.getItem('sensorData') || '{}');
+            const aiAnalysis = JSON.parse(localStorage.getItem('aiAnalysis') || '{}');
+            const cattleType = sensorData.cattleType || '';
+            const season = sensorData.season || '';
+            
+            // Update with AI insights if available
+            if (aiAnalysis.insights && aiAnalysis.insights.length > 0) {
+                const insightsContainer = document.getElementById('cattle-insight-text');
+                if (insightsContainer && aiAnalysis.insights[0]) {
+                    insightsContainer.textContent = aiAnalysis.insights[0].message;
+                }
+            }
+
+            // Cattle type insights
+            const cattleInsights = {
+                'cow': {
+                    name: 'Cow',
+                    fat: '3.5-4.5%',
+                    protein: '3.2-3.5%',
+                    lactose: '4.6-4.8%',
+                    insight: 'Cow milk typically has moderate fat content and is rich in protein. Quality parameters should fall within standard ranges for fresh cow milk.'
+                },
+                'buffalo': {
+                    name: 'Buffalo',
+                    fat: '6.5-8.5%',
+                    protein: '4.0-4.5%',
+                    lactose: '4.5-4.7%',
+                    insight: 'Buffalo milk has higher fat and protein content compared to cow milk. TDS values may be naturally higher due to increased solid content.'
+                },
+                'jersey-cow': {
+                    name: 'Jersey Cow',
+                    fat: '4.5-5.5%',
+                    protein: '3.5-3.8%',
+                    lactose: '4.7-4.9%',
+                    insight: 'Jersey cow milk is known for its rich, creamy texture with higher fat content. Quality indicators should reflect premium milk characteristics.'
+                },
+                'indigenous': {
+                    name: 'Indigenous',
+                    fat: '4.0-5.0%',
+                    protein: '3.3-3.6%',
+                    lactose: '4.6-4.8%',
+                    insight: 'Indigenous cattle breeds may show variation in milk composition. Monitor parameters closely as they may differ from commercial breeds.'
+                },
+                'crossbred': {
+                    name: 'Crossbred',
+                    fat: '3.8-4.8%',
+                    protein: '3.3-3.6%',
+                    lactose: '4.6-4.8%',
+                    insight: 'Crossbred cattle combine characteristics of parent breeds. Milk quality may vary based on genetic composition and management practices.'
+                }
+            };
+
+            // Season insights
+            const seasonInsights = {
+                'summer': {
+                    name: 'Summer',
+                    temp: 'Higher ambient temperatures may increase bacterial growth',
+                    humidity: 'Lower humidity can affect milk composition',
+                    feed: 'Limited green fodder availability may impact quality',
+                    insight: 'Summer conditions require strict temperature control. Higher temperatures can accelerate spoilage, so refrigeration is critical.'
+                },
+                'winter': {
+                    name: 'Winter',
+                    temp: 'Lower temperatures help preserve milk quality naturally',
+                    humidity: 'Moderate humidity levels are favorable',
+                    feed: 'Better quality green fodder available',
+                    insight: 'Winter is generally favorable for milk quality. Lower temperatures naturally slow bacterial growth, but still maintain proper storage.'
+                },
+                'rainy': {
+                    name: 'Rainy',
+                    temp: 'Moderate temperatures with high humidity',
+                    humidity: 'High humidity can affect milk composition',
+                    feed: 'Fresh green fodder available but quality may vary',
+                    insight: 'Rainy season brings high humidity which can affect milk quality. Ensure proper storage and handling to prevent contamination.'
+                }
+            };
+
+            // Update cattle type display
+            if (cattleType && cattleInsights[cattleType]) {
+                const insight = cattleInsights[cattleType];
+                document.getElementById('cattle-type-display').textContent = insight.name;
+                document.getElementById('cattle-insight-text').textContent = insight.insight;
+                document.getElementById('fat-content').textContent = insight.fat;
+                document.getElementById('protein-level').textContent = insight.protein;
+                document.getElementById('lactose-content').textContent = insight.lactose;
+            }
+
+            // Update season display
+            if (season && seasonInsights[season]) {
+                const insight = seasonInsights[season];
+                document.getElementById('season-display').textContent = insight.name;
+                document.getElementById('season-insight-text').textContent = insight.insight;
+                document.getElementById('temp-impact').textContent = insight.temp;
+                document.getElementById('humidity-effect').textContent = insight.humidity;
+                document.getElementById('feed-quality').textContent = insight.feed;
+            }
+        }
+
+        function animateCounter(elementId, target, decimals = 0) {
+            const element = document.getElementById(elementId);
+            anime({
+                targets: { count: 0 },
+                count: target,
+                duration: 2000,
+                easing: 'easeOutQuart',
+                update: function(anim) {
+                    element.textContent = anim.animatables[0].target.count.toFixed(decimals);
+                }
+            });
+        }
+
+        function dismissAlert() {
+            document.getElementById('alert-banner').classList.add('hidden');
+        }
+
+        function startSpoilageTimer() {
+            let hours = 72;
+            const timerElement = document.getElementById('spoilage-timer');
+            
+            setInterval(() => {
+                hours -= 1/3600; // Decrease by 1 second (1/3600 of an hour)
+                if (hours <= 0) {
+                    hours = 0;
+                    timerElement.textContent = 'Expired';
+                    timerElement.classList.add('text-red-600');
+                } else {
+                    timerElement.textContent = Math.floor(hours) + 'h';
+                }
+            }, 1000);
+        }
+
+        function exportResults() {
+            // Use report generator for export
+            if (window.reportGenerator) {
+                window.reportGenerator.exportToJSON();
+            } else {
+                // Fallback to simple export
+                const latestData = localStorage.getItem('latestSensorData');
+                const latestAnalysis = localStorage.getItem('latestAnalysis');
+                
+                const results = {
+                    sensorData: JSON.parse(latestData || '{}'),
+                    analysis: JSON.parse(latestAnalysis || '{}'),
+                    exportedAt: new Date().toISOString()
+                };
+
+                const dataStr = JSON.stringify(results, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'milkoSense_analysis_results.json';
+                link.click();
+                URL.revokeObjectURL(url);
+            }
+        }
+
+        // Initialize charts when page loads
+        function initializeCharts() {
+            // Charts are initialized by main.js
+            console.log('Analysis charts initialized');
+        }
+    </script>
+    <script src="ai-analysis.js"></script>
+    <script src="dynamic-loader.js"></script>
+    <script src="report-generator.js"></script>
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>

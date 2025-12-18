@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IoT Dashboard - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .dashboard-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .gauge-container {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 0 auto;
+        }
+        .gauge-bg {
+            stroke: #e2e8f0;
+            stroke-width: 16;
+            fill: none;
+        }
+        .gauge-fill {
+            stroke-width: 16;
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke-dasharray 2s ease;
+        }
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        .status-online {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        .status-offline {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        .status-warning {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        .data-stream {
+            font-family: 'Courier New', monospace;
+            background: #1f2937;
+            color: #10b981;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .alert-banner {
+            animation: slideInDown 0.5s ease-out;
+        }
+        @keyframes slideInDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="realtime-dashboard.html" class="nav-link text-gray-600 font-medium">Real-Time</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link active text-gray-900 font-medium">Dashboard</a>
+                    <a href="analysis-dashboard.html" class="nav-link text-gray-600 font-medium">Analysis Dashboard</a>
+                    <a href="recommendations.html" class="nav-link text-gray-600 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link text-gray-600 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Alert Banner -->
+    <div id="alert-banner" class="alert-banner fixed top-16 left-0 right-0 bg-yellow-500 text-white p-4 z-40 hidden">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <span class="font-semibold">Quality Alert: Temperature approaching critical threshold!</span>
+            </div>
+            <button onclick="dismissAlert()" class="text-white hover:text-gray-200">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="mb-6 lg:mb-0">
+                    <h1 class="text-5xl font-bold text-gray-900 mb-4">
+                        IoT <span class="text-blue-600">Dashboard</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 max-w-2xl leading-relaxed">
+                        Real-time monitoring of milk quality parameters with ESP32-based sensor array 
+                        and cloud-connected analytics platform.
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <div class="status-indicator status-online">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 pulse-animation"></div>
+                        ESP32 Connected
+                    </div>
+                    <div class="status-indicator status-online">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2 pulse-animation"></div>
+                        Cloud Synced
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Real-time Gauges -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Live Sensor Readings</h2>
+                <p class="text-xl text-gray-600">Real-time data from milk quality monitoring sensors</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-5 gap-8 mb-12">
+                <!-- pH Gauge -->
+                <div class="dashboard-card p-6 rounded-2xl text-center">
+                    <div class="gauge-container mb-4">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="100" cy="100" r="84" class="gauge-bg"></circle>
+                            <circle cx="100" cy="100" r="84" class="gauge-fill" 
+                                    stroke="#10b981" stroke-dasharray="158 528" 
+                                    id="ph-gauge-live"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900" id="ph-value-live">6.7</div>
+                                <div class="text-sm text-gray-500">pH</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">pH Level</h3>
+                    <div class="status-indicator status-online mx-auto">
+                        <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                        Optimal
+                    </div>
+                </div>
+
+                <!-- Temperature Gauge -->
+                <div class="dashboard-card p-6 rounded-2xl text-center">
+                    <div class="gauge-container mb-4">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="100" cy="100" r="84" class="gauge-bg"></circle>
+                            <circle cx="100" cy="100" r="84" class="gauge-fill" 
+                                    stroke="#3b82f6" stroke-dasharray="151 528" 
+                                    id="temp-gauge-live"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900" id="temperature-value-live">18.5</div>
+                                <div class="text-sm text-gray-500">°C</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Temperature</h3>
+                    <div class="status-indicator status-online mx-auto">
+                        <div class="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                        Ideal
+                    </div>
+                </div>
+
+                <!-- Turbidity Gauge -->
+                <div class="dashboard-card p-6 rounded-2xl text-center">
+                    <div class="gauge-container mb-4">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="100" cy="100" r="84" class="gauge-bg"></circle>
+                            <circle cx="100" cy="100" r="84" class="gauge-fill" 
+                                    stroke="#f59e0b" stroke-dasharray="133 528" 
+                                    id="turbidity-gauge-live"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900" id="turbidity-value-live">15.2</div>
+                                <div class="text-sm text-gray-500">NTU</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Turbidity</h3>
+                    <div class="status-indicator status-online mx-auto">
+                        <div class="w-2 h-2 bg-yellow-500 rounded-full mr-2"></div>
+                        Normal
+                    </div>
+                </div>
+
+                <!-- TDS Gauge -->
+                <div class="dashboard-card p-6 rounded-2xl text-center">
+                    <div class="gauge-container mb-4">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="100" cy="100" r="84" class="gauge-bg"></circle>
+                            <circle cx="100" cy="100" r="84" class="gauge-fill" 
+                                    stroke="#8b5cf6" stroke-dasharray="141 528" 
+                                    id="tds-gauge-live"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900" id="tds-value-live">850</div>
+                                <div class="text-sm text-gray-500">ppm</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">TDS</h3>
+                    <div class="status-indicator status-online mx-auto">
+                        <div class="w-2 h-2 bg-purple-500 rounded-full mr-2"></div>
+                        Normal
+                    </div>
+                </div>
+
+                <!-- Gas Gauge -->
+                <div class="dashboard-card p-6 rounded-2xl text-center">
+                    <div class="gauge-container mb-4">
+                        <svg class="w-full h-full transform -rotate-90">
+                            <circle cx="100" cy="100" r="84" class="gauge-bg"></circle>
+                            <circle cx="100" cy="100" r="84" class="gauge-fill" 
+                                    stroke="#ef4444" stroke-dasharray="106 528" 
+                                    id="gas-gauge-live"></circle>
+                        </svg>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="text-center">
+                                <div class="text-3xl font-bold text-gray-900" id="gas-value-live">125</div>
+                                <div class="text-sm text-gray-500">ppm</div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-900 mb-2">Gas (MQ135)</h3>
+                    <div class="status-indicator status-online mx-auto">
+                        <div class="w-2 h-2 bg-red-500 rounded-full mr-2"></div>
+                        Clean
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts and Data Stream -->
+    <section class="py-20 bg-gray-50 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-3 gap-8">
+                <!-- Real-time Chart -->
+                <div class="lg:col-span-2">
+                    <div class="dashboard-card p-6 rounded-2xl">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-xl font-bold text-gray-900">Real-Time Data Trends</h3>
+                            <div class="flex items-center space-x-4">
+                                <!-- Time Range Filter -->
+                                <select id="time-range" class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="1h">Last Hour</option>
+                                    <option value="6h">Last 6 Hours</option>
+                                    <option value="24h" selected>Last 24 Hours</option>
+                                    <option value="7d">Last 7 Days</option>
+                                    <option value="30d">Last 30 Days</option>
+                                </select>
+                                <!-- Parameter Toggle -->
+                                <div class="flex items-center space-x-2">
+                                    <label class="flex items-center space-x-1 text-sm">
+                                        <input type="checkbox" class="param-toggle" data-param="ph" checked>
+                                        <span>pH</span>
+                                    </label>
+                                    <label class="flex items-center space-x-1 text-sm">
+                                        <input type="checkbox" class="param-toggle" data-param="temp" checked>
+                                        <span>Temp</span>
+                                    </label>
+                                    <label class="flex items-center space-x-1 text-sm">
+                                        <input type="checkbox" class="param-toggle" data-param="turbidity" checked>
+                                        <span>Turb</span>
+                                    </label>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-3 h-3 bg-green-500 rounded-full pulse-animation"></div>
+                                    <span class="text-sm text-gray-600">Live</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="dashboard-chart" style="height: 400px;"></div>
+                        <div class="mt-4 flex items-center justify-between">
+                            <div class="flex items-center space-x-4 text-sm text-gray-600">
+                                <button onclick="pauseUpdates()" id="pause-btn" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+                                    <span id="pause-text">Pause</span>
+                                </button>
+                                <button onclick="resetZoom()" class="px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 transition-colors">
+                                    Reset Zoom
+                                </button>
+                            </div>
+                            <button onclick="exportChart()" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors text-sm">
+                                Export Chart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Stream and Controls -->
+                <div class="space-y-6">
+                    <!-- Device Status -->
+                    <div class="dashboard-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Device Status</h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">ESP32 Controller</span>
+                                <div class="status-indicator status-online">
+                                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
+                                    Online
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">WiFi Signal</span>
+                                <div class="flex items-center space-x-1">
+                                    <div class="w-2 h-4 bg-green-500 rounded-sm"></div>
+                                    <div class="w-2 h-6 bg-green-500 rounded-sm"></div>
+                                    <div class="w-2 h-8 bg-green-500 rounded-sm"></div>
+                                    <span class="text-sm text-gray-600 ml-2">Strong</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Battery Level</span>
+                                <div class="flex items-center space-x-2">
+                                    <div class="w-16 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                        <div class="w-3/4 h-full bg-green-500 rounded-full"></div>
+                                    </div>
+                                    <span class="text-sm text-gray-600">75%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-600">Last Update</span>
+                                <span class="text-sm text-gray-600" id="last-update">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="dashboard-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="space-y-3">
+                            <button onclick="calibrateSensors()" class="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                                Calibrate Sensors
+                            </button>
+                            <button onclick="exportData()" class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                                Export Data
+                            </button>
+                            <button onclick="resetAlerts()" class="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors">
+                                Reset Alerts
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Data Stream -->
+                    <div class="dashboard-card p-6 rounded-2xl">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Raw Data Stream</h3>
+                        <div class="data-stream text-xs" id="data-stream">
+                            [2025-11-30 14:23:15] PH: 6.7 | TEMP: 18.5°C | TURB: 15.2 NTU | TDS: 850 ppm | GAS: 125 ppm<br>
+                            [2025-11-30 14:23:10] PH: 6.7 | TEMP: 18.3°C | TURB: 15.1 NTU | TDS: 848 ppm | GAS: 123 ppm<br>
+                            [2025-11-30 14:23:05] PH: 6.6 | TEMP: 18.4°C | TURB: 15.3 NTU | TDS: 852 ppm | GAS: 126 ppm<br>
+                            [2025-11-30 14:23:00] PH: 6.7 | TEMP: 18.5°C | TURB: 15.2 NTU | TDS: 850 ppm | GAS: 125 ppm
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Device Management & Controls -->
+    <section class="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Device Management</h2>
+                <p class="text-xl text-gray-600">IoT device status, controls, and system health monitoring</p>
+            </div>
+            
+            <div class="grid lg:grid-cols-2 gap-8 mb-12">
+                <!-- Sensor Health Status -->
+                <div class="dashboard-card p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">Sensor Health Status</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <div class="text-lg font-bold text-green-900">pH Sensor</div>
+                                    <div class="text-sm text-green-700">Operating normally</div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-green-600">100%</div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <div class="text-lg font-bold text-green-900">Temperature Sensor</div>
+                                    <div class="text-sm text-green-700">Operating normally</div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-green-600">100%</div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <div class="text-lg font-bold text-green-900">Turbidity Sensor</div>
+                                    <div class="text-sm text-green-700">Operating normally</div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-green-600">100%</div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <div class="text-lg font-bold text-green-900">TDS Sensor</div>
+                                    <div class="text-sm text-green-700">Operating normally</div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-green-600">100%</div>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div>
+                                    <div class="text-lg font-bold text-green-900">Gas Sensor (MQ135)</div>
+                                    <div class="text-sm text-green-700">Operating normally</div>
+                                </div>
+                            </div>
+                            <div class="text-2xl font-bold text-green-600">100%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Performance -->
+                <div class="dashboard-card p-6 rounded-2xl">
+                    <h3 class="text-xl font-bold text-gray-900 mb-6">System Performance</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600">Sensor Accuracy</span>
+                                <span class="font-semibold">99.2%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 99.2%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600">Data Transmission</span>
+                                <span class="font-semibold">98.7%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 98.7%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600">Battery Efficiency</span>
+                                <span class="font-semibold">94.5%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 94.5%"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-gray-600">Cloud Uptime</span>
+                                <span class="font-semibold">99.9%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-orange-500 h-2 rounded-full" style="width: 99.9%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Real-Time Alerts -->
+            <div class="dashboard-card p-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Real-Time Alert Log</h3>
+                    <button onclick="clearAlertLog()" class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                        Clear Log
+                    </button>
+                </div>
+                <div id="alert-log" class="space-y-4 max-h-96 overflow-y-auto">
+                    <div class="flex items-center justify-between p-4 bg-green-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-green-500 rounded-full pulse-animation"></div>
+                            <div>
+                                <div class="font-medium text-green-900">Quality Check Passed</div>
+                                <div class="text-sm text-green-700">All parameters within normal range</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-green-600">Just now</div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div>
+                                <div class="font-medium text-blue-900">Data Sync Complete</div>
+                                <div class="text-sm text-blue-700">All sensor data uploaded to cloud</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-blue-600">5 min ago</div>
+                    </div>
+                    <div class="flex items-center justify-between p-4 bg-blue-50 rounded-lg">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <div>
+                                <div class="font-medium text-blue-900">Calibration Complete</div>
+                                <div class="text-sm text-blue-700">Sensors successfully calibrated</div>
+                            </div>
+                        </div>
+                        <div class="text-sm text-blue-600">1 hour ago</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Link to Analysis Dashboard -->
+            <div class="mt-8 text-center">
+                <a href="analysis-dashboard.html" class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-500 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-600 transition-all duration-300 shadow-lg">
+                    View Historical Analysis Dashboard
+                    <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeDashboard();
+            startRealTimeUpdates();
+            initializeCharts();
+        });
+
+        function initializeDashboard() {
+            // Animate gauges on load
+            anime({
+                targets: '.gauge-fill',
+                strokeDasharray: function(el) {
+                    return el.getAttribute('stroke-dasharray');
+                },
+                duration: 2000,
+                easing: 'easeOutQuart',
+                delay: anime.stagger(200)
+            });
+
+            // Update last update time
+            updateLastUpdateTime();
+        }
+
+        function startRealTimeUpdates() {
+            // Update sensor values every 5 seconds
+            setInterval(updateSensorValues, 5000);
+            
+            // Update data stream every 3 seconds
+            setInterval(updateDataStream, 3000);
+            
+            // Update last update time every minute
+            setInterval(updateLastUpdateTime, 60000);
+        }
+
+        function updateSensorValues() {
+            const sensors = [
+                { id: 'ph', min: 6.5, max: 6.8, decimals: 1 },
+                { id: 'temperature', min: 17, max: 20, decimals: 1 },
+                { id: 'turbidity', min: 14, max: 17, decimals: 1 },
+                { id: 'tds', min: 840, max: 860, decimals: 0 },
+                { id: 'gas', min: 120, max: 130, decimals: 0 }
+            ];
+
+            sensors.forEach(sensor => {
+                const value = (Math.random() * (sensor.max - sensor.min) + sensor.min).toFixed(sensor.decimals);
+                const element = document.getElementById(`${sensor.id}-value-live`);
+                
+                if (element) {
+                    // Animate value change
+                    anime({
+                        targets: element,
+                        innerHTML: [element.innerHTML, value],
+                        duration: 1000,
+                        easing: 'easeInOutQuad',
+                        round: sensor.decimals === 0 ? 1 : 100
+                    });
+                }
+            });
+
+            // Check for alerts
+            checkForAlerts();
+        }
+
+        function updateDataStream() {
+            const stream = document.getElementById('data-stream');
+            const now = new Date();
+            const timestamp = now.toLocaleDateString() + ' ' + now.toLocaleTimeString();
+            
+            const ph = (Math.random() * 0.2 + 6.6).toFixed(1);
+            const temp = (Math.random() * 2 + 18).toFixed(1);
+            const turb = (Math.random() * 1 + 15).toFixed(1);
+            const tds = Math.floor(Math.random() * 20 + 840);
+            const gas = Math.floor(Math.random() * 10 + 120);
+            
+            const newLine = `[${timestamp}] PH: ${ph} | TEMP: ${temp}°C | TURB: ${turb} NTU | TDS: ${tds} ppm | GAS: ${gas} ppm`;
+            
+            // Add new line and keep only last 4 lines
+            const lines = stream.innerHTML.split('<br>');
+            lines.unshift(newLine);
+            if (lines.length > 4) lines.pop();
+            stream.innerHTML = lines.join('<br>');
+        }
+
+        function updateLastUpdateTime() {
+            const element = document.getElementById('last-update');
+            if (element) {
+                element.textContent = 'Just now';
+            }
+        }
+
+        function checkForAlerts() {
+            // Simulate temperature alert
+            const temp = parseFloat(document.getElementById('temperature-value-live').textContent);
+            const alertBanner = document.getElementById('alert-banner');
+            
+            if (temp > 22 && alertBanner.classList.contains('hidden')) {
+                alertBanner.classList.remove('hidden');
+            } else if (temp <= 22 && !alertBanner.classList.contains('hidden')) {
+                alertBanner.classList.add('hidden');
+            }
+        }
+
+        function dismissAlert() {
+            document.getElementById('alert-banner').classList.add('hidden');
+        }
+
+        function calibrateSensors() {
+            MilkoSense.showNotification('Sensor calibration initiated...', 'info');
+            
+            setTimeout(() => {
+                MilkoSense.showNotification('Sensors calibrated successfully!', 'success');
+            }, 2000);
+        }
+
+        function exportData() {
+            const data = {
+                timestamp: new Date().toISOString(),
+                ph: document.getElementById('ph-value-live').textContent,
+                temperature: document.getElementById('temperature-value-live').textContent,
+                turbidity: document.getElementById('turbidity-value-live').textContent,
+                tds: document.getElementById('tds-value-live').textContent,
+                gas: document.getElementById('gas-value-live').textContent,
+                deviceStatus: 'online',
+                batteryLevel: '75%'
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'milkoSense_dashboard_data.json';
+            link.click();
+            URL.revokeObjectURL(url);
+
+            MilkoSense.showNotification('Dashboard data exported successfully!', 'success');
+        }
+
+        function resetAlerts() {
+            document.getElementById('alert-banner').classList.add('hidden');
+            MilkoSense.showNotification('All alerts have been reset', 'info');
+        }
+        
+        function clearAlertLog() {
+            const alertLog = document.getElementById('alert-log');
+            if (alertLog) {
+                alertLog.innerHTML = '<div class="text-center text-gray-500 py-8">Alert log cleared</div>';
+                setTimeout(() => {
+                    location.reload();
+                }, 2000);
+            }
+        }
+
+        // Initialize charts
+        let dashboardChart = null;
+        let isPaused = false;
+        let updateInterval = null;
+
+        function initializeCharts() {
+            const chartDom = document.getElementById('dashboard-chart');
+            if (!chartDom) return;
+            
+            dashboardChart = echarts.init(chartDom);
+            
+            // Generate initial data
+            let timeData = [];
+            let phData = [];
+            let tempData = [];
+            let turbidityData = [];
+            
+            const now = Date.now();
+            for (let i = 59; i >= 0; i--) {
+                const time = new Date(now - i * 60000);
+                timeData.push(time.toLocaleTimeString());
+                phData.push(6.5 + Math.random() * 0.4);
+                tempData.push(17 + Math.random() * 4);
+                turbidityData.push(14 + Math.random() * 4);
+            }
+            
+            const option = {
+                title: {
+                    text: 'Real-Time Sensor Data',
+                    textStyle: { color: '#374151', fontSize: 16, fontWeight: 'bold' },
+                    left: 'center'
+                },
+                tooltip: { 
+                    trigger: 'axis',
+                    axisPointer: { type: 'cross' }
+                },
+                legend: {
+                    data: ['pH', 'Temperature', 'Turbidity'],
+                    bottom: 0,
+                    selected: {
+                        'pH': true,
+                        'Temperature': true,
+                        'Turbidity': true
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 70,
+                        end: 100
+                    },
+                    {
+                        type: 'slider',
+                        start: 70,
+                        end: 100,
+                        height: 20
+                    }
+                ],
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: timeData,
+                    axisLabel: {
+                        rotate: 45
+                    }
+                },
+                yAxis: [
+                    {
+                        type: 'value',
+                        name: 'pH / Temperature',
+                        position: 'left',
+                        axisLabel: { formatter: '{value}' }
+                    },
+                    {
+                        type: 'value',
+                        name: 'Turbidity (NTU)',
+                        position: 'right',
+                        axisLabel: { formatter: '{value}' }
+                    }
+                ],
+                series: [
+                    {
+                        name: 'pH',
+                        type: 'line',
+                        data: phData,
+                        smooth: true,
+                        itemStyle: { color: '#2563eb' },
+                        areaStyle: { opacity: 0.2, color: '#2563eb' },
+                        yAxisIndex: 0
+                    },
+                    {
+                        name: 'Temperature',
+                        type: 'line',
+                        data: tempData,
+                        smooth: true,
+                        itemStyle: { color: '#10b981' },
+                        areaStyle: { opacity: 0.2, color: '#10b981' },
+                        yAxisIndex: 0
+                    },
+                    {
+                        name: 'Turbidity',
+                        type: 'line',
+                        data: turbidityData,
+                        smooth: true,
+                        itemStyle: { color: '#f59e0b' },
+                        areaStyle: { opacity: 0.2, color: '#f59e0b' },
+                        yAxisIndex: 1
+                    }
+                ]
+            };
+            
+            dashboardChart.setOption(option);
+            
+            // Update chart every 5 seconds
+            updateInterval = setInterval(() => {
+                if (!isPaused) {
+                    updateChart();
+                }
+            }, 5000);
+            
+            // Handle parameter toggles
+            document.querySelectorAll('.param-toggle').forEach(toggle => {
+                toggle.addEventListener('change', function() {
+                    const param = this.dataset.param;
+                    const legend = dashboardChart.getOption().legend[0];
+                    const series = dashboardChart.getOption().series;
+                    
+                    const paramMap = { ph: 'pH', temp: 'Temperature', turbidity: 'Turbidity' };
+                    const paramName = paramMap[param];
+                    
+                    legend.selected[paramName] = this.checked;
+                    dashboardChart.dispatchAction({
+                        type: 'legendToggleSelect',
+                        name: paramName
+                    });
+                });
+            });
+            
+            // Handle time range change
+            document.getElementById('time-range').addEventListener('change', function() {
+                updateTimeRange(this.value);
+            });
+            
+            // Make chart responsive
+            window.addEventListener('resize', () => {
+                dashboardChart.resize();
+            });
+        }
+        
+        function updateChart() {
+            if (!dashboardChart) return;
+            
+            const option = dashboardChart.getOption();
+            const timeData = option.xAxis[0].data;
+            const phData = option.series[0].data;
+            const tempData = option.series[1].data;
+            const turbidityData = option.series[2].data;
+            
+            // Remove first data point
+            timeData.shift();
+            phData.shift();
+            tempData.shift();
+            turbidityData.shift();
+            
+            // Add new data point
+            timeData.push(new Date().toLocaleTimeString());
+            phData.push(6.5 + Math.random() * 0.4);
+            tempData.push(17 + Math.random() * 4);
+            turbidityData.push(14 + Math.random() * 4);
+            
+            dashboardChart.setOption({
+                xAxis: { data: timeData },
+                series: [
+                    { data: phData },
+                    { data: tempData },
+                    { data: turbidityData }
+                ]
+            });
+        }
+        
+        function pauseUpdates() {
+            isPaused = !isPaused;
+            const btn = document.getElementById('pause-btn');
+            const text = document.getElementById('pause-text');
+            if (isPaused) {
+                btn.classList.remove('bg-gray-200');
+                btn.classList.add('bg-yellow-500', 'text-white');
+                text.textContent = 'Resume';
+            } else {
+                btn.classList.remove('bg-yellow-500', 'text-white');
+                btn.classList.add('bg-gray-200');
+                text.textContent = 'Pause';
+            }
+        }
+        
+        function resetZoom() {
+            if (dashboardChart) {
+                dashboardChart.dispatchAction({
+                    type: 'dataZoom',
+                    start: 0,
+                    end: 100
+                });
+            }
+        }
+        
+        function exportChart() {
+            if (dashboardChart) {
+                const url = dashboardChart.getDataURL({
+                    type: 'png',
+                    pixelRatio: 2,
+                    backgroundColor: '#fff'
+                });
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `milkoSense_chart_${new Date().toISOString()}.png`;
+                link.click();
+                MilkoSense.showNotification('Chart exported successfully!', 'success');
+            }
+        }
+        
+        function updateTimeRange(range) {
+            // This would filter data based on time range
+            // For now, just show a notification
+            MilkoSense.showNotification(`Time range updated to ${range}`, 'info');
+        }
+    </script>
+    <script src="ai-analysis.js"></script>
+    <script src="firebase-integration.js"></script>
+    <script src="dynamic-loader.js"></script>
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>

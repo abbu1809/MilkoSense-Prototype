@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time Dashboard - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <script src="trend-analysis.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .sensor-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .sensor-card.updating {
+            border-color: #2563eb;
+            box-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+        }
+        .live-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #ef4444;
+            border-radius: 50%;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .status-optimal { color: #10b981; }
+        .status-good { color: #3b82f6; }
+        .status-fair { color: #f59e0b; }
+        .status-poor { color: #ef4444; }
+        .chart-container {
+            height: 300px;
+        }
+        .grade-display {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: bold;
+            color: white;
+            margin: 0 auto;
+        }
+        .grade-a { background: linear-gradient(135deg, #10b981, #059669); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .countdown {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2563eb;
+        }
+        [data-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
+        [data-theme="dark"] .bg-white { background-color: #1e293b; }
+        [data-theme="dark"] .bg-gray-50 { background-color: #0f172a; }
+        [data-theme="dark"] .text-gray-900 { color: #e2e8f0; }
+        [data-theme="dark"] .text-gray-600 { color: #94a3b8; }
+        [data-theme="dark"] nav { background-color: rgba(15, 23, 42, 0.9); border-color: #334155; }
+        [data-theme="dark"] .sensor-card { background: linear-gradient(135deg, #1e293b 0%, #334155 100%); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-50 border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-600 to-blue-500 rounded-xl flex items-center justify-center">
+                        <span class="text-white font-bold text-xl">M</span>
+                    </div>
+                    <div>
+                        <h1 class="text-2xl font-bold text-gray-900">MilkoSense</h1>
+                        <p class="text-xs text-gray-600">Real-Time Monitoring</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 hover:text-blue-600 font-medium">Home</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 hover:text-blue-600 font-medium">Sensors</a>
+                    <a href="realtime-dashboard.html" class="nav-link active text-gray-600 hover:text-blue-600 font-medium">Real-Time</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 hover:text-blue-600 font-medium">Analysis</a>
+                    <button id="theme-toggle" class="p-2 rounded-lg hover:bg-gray-100 transition-colors">
+                        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="pt-28 pb-16 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <!-- Header -->
+            <div class="text-center mb-8">
+                <div class="flex items-center justify-center space-x-2 mb-4">
+                    <h2 class="text-4xl font-bold text-gray-900">Live Monitoring Dashboard</h2>
+                    <span class="live-indicator"></span>
+                </div>
+                <p class="text-lg text-gray-600">Real-time data from Firebase • Updates every 3 seconds</p>
+            </div>
+
+            <!-- Cattle Information Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <h3 class="text-xl font-bold text-gray-900 mb-4">Cattle & Environmental Information</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Cattle Breed / Type</label>
+                        <select id="cattle-type" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="cow">Cow (Generic)</option>
+                            <option value="jersey">Jersey Cow</option>
+                            <option value="holstein">Holstein Cow</option>
+                            <option value="gir">Gir Cow</option>
+                            <option value="sahiwal">Sahiwal Cow</option>
+                            <option value="red-sindhi">Red Sindhi</option>
+                            <option value="buffalo">Buffalo (Generic)</option>
+                            <option value="murrah">Murrah Buffalo</option>
+                            <option value="jaffarabadi">Jaffarabadi Buffalo</option>
+                            <option value="goat">Goat</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Season</label>
+                        <select id="season" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="summer">Summer</option>
+                            <option value="monsoon">Monsoon</option>
+                            <option value="autumn">Autumn</option>
+                            <option value="winter">Winter</option>
+                            <option value="spring">Spring</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-4 bg-blue-50 p-4 rounded-lg">
+                    <p class="text-sm text-blue-800">
+                        <span class="font-semibold">Note:</span> Breed and seasonal information helps the AI provide more accurate analysis and tailored recommendations for your specific conditions.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center space-x-4">
+                        <button id="start-btn" class="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors">
+                            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            Start Monitoring
+                        </button>
+                        <button id="stop-btn" class="px-6 py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors" disabled>
+                            <svg class="inline w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 10a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
+                            </svg>
+                            Stop Monitoring
+                        </button>
+                    </div>
+                    <div class="flex items-center space-x-6">
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Status</p>
+                            <p id="status-text" class="text-lg font-bold text-gray-400">Stopped</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Next Update</p>
+                            <p id="countdown" class="countdown">-</p>
+                        </div>
+                        <div class="text-center">
+                            <p class="text-sm text-gray-600">Updates</p>
+                            <p id="update-count" class="text-lg font-bold text-blue-600">0</p>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <button id="generate-report-btn" class="px-4 py-2 bg-purple-600 text-white font-semibold rounded-lg hover:bg-purple-700 transition-colors" title="Generate PDF Report">
+                                <svg class="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                Report
+                            </button>
+                            <button id="export-csv-btn" class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors" title="Export as CSV">
+                                <svg class="inline w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                </svg>
+                                CSV
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quality Grade Display -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 text-center mb-6">Current Milk Quality</h3>
+                <div class="flex items-center justify-center mb-4">
+                    <div id="quality-grade" class="grade-display grade-a">-</div>
+                </div>
+                <div class="text-center">
+                    <p id="quality-label" class="text-2xl font-semibold text-gray-700 mb-2">Waiting for data...</p>
+                    <p id="quality-score" class="text-lg text-gray-600">Score: --/100</p>
+                </div>
+            </div>
+
+            <!-- Real-Time Sensor Data -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <!-- pH Card -->
+                <div class="sensor-card rounded-2xl p-6" id="ph-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">pH Level</h4>
+                        <span id="ph-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="ph-value">-</div>
+                    <p class="text-sm text-gray-600">Optimal: 6.4 - 6.7</p>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="ph-bar" class="h-full bg-blue-600 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Temperature Card -->
+                <div class="sensor-card rounded-2xl p-6" id="temp-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Temperature</h4>
+                        <span id="temp-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="temp-value">-</div>
+                    <p class="text-sm text-gray-600">Optimal: 15°C - 30°C</p>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="temp-bar" class="h-full bg-orange-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Turbidity Card -->
+                <div class="sensor-card rounded-2xl p-6" id="turbidity-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Turbidity</h4>
+                        <span id="turbidity-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="turbidity-value">-</div>
+                    <p class="text-sm text-gray-600">Optimal: 10 - 20 NTU</p>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="turbidity-bar" class="h-full bg-teal-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- TDS Card -->
+                <div class="sensor-card rounded-2xl p-6" id="tds-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">TDS</h4>
+                        <span id="tds-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="tds-value">-</div>
+                    <p class="text-sm text-gray-600">Optimal: 300 - 600 ppm</p>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="tds-bar" class="h-full bg-purple-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Gas Card -->
+                <div class="sensor-card rounded-2xl p-6" id="gas-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Gas Sensor</h4>
+                        <span id="gas-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="gas-value">-</div>
+                    <p class="text-sm text-gray-600">Optimal: 100 - 150</p>
+                    <div class="mt-4 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="gas-bar" class="h-full bg-indigo-500 transition-all duration-300" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Overall Quality -->
+                <div class="sensor-card rounded-2xl p-6 bg-gradient-to-br from-blue-50 to-indigo-50">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-gray-900">Overall Quality</h4>
+                        <span id="overall-status" class="text-sm font-medium">-</span>
+                    </div>
+                    <div class="text-4xl font-bold text-gray-900 mb-2" id="overall-quality">-</div>
+                    <p class="text-sm text-gray-600">Firebase Status</p>
+                    <div class="mt-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            <span class="text-sm text-gray-600" id="connection-status">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Multi-Parameter Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <!-- pH Trend Chart -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">pH Level Trend</h3>
+                    <div id="ph-chart" class="chart-container"></div>
+                </div>
+
+                <!-- Temperature Trend Chart -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Temperature Trend</h3>
+                    <div id="temp-chart" class="chart-container"></div>
+                </div>
+
+                <!-- Turbidity & TDS Chart -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Turbidity & TDS</h3>
+                    <div id="turbidity-tds-chart" class="chart-container"></div>
+                </div>
+
+                <!-- Gas Level Chart -->
+                <div class="bg-white rounded-2xl shadow-lg p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Gas Sensor Readings</h3>
+                    <div id="gas-chart" class="chart-container"></div>
+                </div>
+            </div>
+
+            <!-- Quality Score Timeline -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Quality Score Timeline</h3>
+                <div id="quality-chart" class="chart-container"></div>
+            </div>
+
+            <!-- Trend Analysis & Insights -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-2xl font-bold text-gray-900">Trend Analysis & Predictive Insights</h3>
+                    <select id="trend-timeframe" class="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium">
+                        <option value="1hour">Last Hour</option>
+                        <option value="6hours">Last 6 Hours</option>
+                        <option value="12hours">Last 12 Hours</option>
+                        <option value="24hours" selected>Last 24 Hours</option>
+                        <option value="7days">Last 7 Days</option>
+                        <option value="30days">Last 30 Days</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+                
+                <!-- Trend Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <!-- Quality Trend -->
+                    <div id="quality-trend-card" class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-lg border border-blue-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-blue-900">Quality Trend</h4>
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                        </div>
+                        <p id="quality-trend-value" class="text-3xl font-bold text-blue-900 mb-2">-</p>
+                        <p id="quality-trend-text" class="text-sm text-blue-700">Loading trend data...</p>
+                    </div>
+                    
+                    <!-- Anomalies Detected -->
+                    <div id="anomalies-card" class="bg-gradient-to-br from-amber-50 to-amber-100 p-6 rounded-lg border border-amber-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-amber-900">Anomalies Detected</h4>
+                            <svg class="w-8 h-8 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                            </svg>
+                        </div>
+                        <p id="anomalies-count" class="text-3xl font-bold text-amber-900 mb-2">0</p>
+                        <p id="anomalies-text" class="text-sm text-amber-700">No anomalies</p>
+                    </div>
+                    
+                    <!-- Data Quality -->
+                    <div id="data-quality-card" class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-lg border border-green-200">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-sm font-semibold text-green-900">Data Quality</h4>
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <p id="data-quality-value" class="text-3xl font-bold text-green-900 mb-2">-</p>
+                        <p id="data-quality-text" class="text-sm text-green-700">Based on <span id="total-readings">0</span> readings</p>
+                    </div>
+                </div>
+                
+                <!-- Parameter Statistics -->
+                <div id="parameter-stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                    <!-- Stats will be dynamically populated -->
+                </div>
+                
+                <!-- Predictions -->
+                <div id="predictions-section" class="bg-gray-50 p-6 rounded-lg">
+                    <h4 class="text-lg font-bold text-gray-900 mb-4">Predictive Analysis (Next Reading)</h4>
+                    <div id="predictions-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <!-- Predictions will be dynamically populated -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Analysis & Recommendations -->
+            <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">AI-Powered Analysis & Recommendations</h3>
+                <div id="ai-recommendations" class="space-y-4">
+                    <p class="text-gray-600 text-center py-8">No recommendations yet. Start monitoring to receive AI-powered insights.</p>
+                </div>
+            </div>
+
+            <!-- Recent Analysis History -->
+            <div class="bg-white rounded-2xl shadow-lg p-8">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6">Recent Analysis History</h3>
+                <div id="history-list" class="space-y-4">
+                    <p class="text-gray-600 text-center py-8">No analysis data yet. Start monitoring to see results.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="ai-analysis.js"></script>
+    <script src="firebase-integration.js"></script>
+    <script src="report-generator.js"></script>
+    <script src="theme.js"></script>
+    <script>
+        // Dashboard Controller
+        let updateCount = 0;
+        let countdownInterval = null;
+        let countdown = 3;
+        let historyChart = null;
+        let chartData = {
+            timestamps: [],
+            ph: [],
+            temperature: [],
+            turbidity: [],
+            tds: [],
+            gas: []
+        };
+
+        // Initialize charts
+        let phChart, tempChart, turbidityTdsChart, gasChart, qualityChart;
+
+        function initCharts() {
+            // pH Chart
+            phChart = echarts.init(document.getElementById('ph-chart'));
+            phChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '10%' },
+                xAxis: { type: 'category', data: [], axisLabel: { rotate: 45 } },
+                yAxis: { type: 'value', min: 6, max: 7.5, name: 'pH' },
+                series: [{
+                    type: 'line',
+                    data: [],
+                    smooth: true,
+                    areaStyle: { opacity: 0.3 },
+                    itemStyle: { color: '#3b82f6' },
+                    markLine: {
+                        data: [
+                            { yAxis: 6.4, label: { formatter: 'Optimal Min' }, lineStyle: { color: '#10b981' } },
+                            { yAxis: 6.7, label: { formatter: 'Optimal Max' }, lineStyle: { color: '#10b981' } }
+                        ]
+                    }
+                }]
+            });
+
+            // Temperature Chart
+            tempChart = echarts.init(document.getElementById('temp-chart'));
+            tempChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '10%' },
+                xAxis: { type: 'category', data: [], axisLabel: { rotate: 45 } },
+                yAxis: { type: 'value', name: '°C' },
+                series: [{
+                    type: 'line',
+                    data: [],
+                    smooth: true,
+                    areaStyle: { opacity: 0.3 },
+                    itemStyle: { color: '#f59e0b' },
+                    markLine: {
+                        data: [
+                            { yAxis: 15, label: { formatter: 'Optimal Min' }, lineStyle: { color: '#10b981' } },
+                            { yAxis: 30, label: { formatter: 'Optimal Max' }, lineStyle: { color: '#10b981' } }
+                        ]
+                    }
+                }]
+            });
+
+            // Turbidity & TDS Chart
+            turbidityTdsChart = echarts.init(document.getElementById('turbidity-tds-chart'));
+            turbidityTdsChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: { data: ['Turbidity', 'TDS'] },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '15%' },
+                xAxis: { type: 'category', data: [], axisLabel: { rotate: 45 } },
+                yAxis: [
+                    { type: 'value', name: 'Turbidity (NTU)' },
+                    { type: 'value', name: 'TDS (ppm)', position: 'right' }
+                ],
+                series: [
+                    { name: 'Turbidity', type: 'line', data: [], smooth: true, itemStyle: { color: '#14b8a6' } },
+                    { name: 'TDS', type: 'line', data: [], smooth: true, yAxisIndex: 1, itemStyle: { color: '#8b5cf6' } }
+                ]
+            });
+
+            // Gas Chart
+            gasChart = echarts.init(document.getElementById('gas-chart'));
+            gasChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { left: '10%', right: '5%', bottom: '15%', top: '10%' },
+                xAxis: { type: 'category', data: [], axisLabel: { rotate: 45 } },
+                yAxis: { type: 'value', name: 'Gas Level' },
+                series: [{
+                    type: 'line',
+                    data: [],
+                    smooth: true,
+                    areaStyle: { opacity: 0.3 },
+                    itemStyle: { color: '#6366f1' },
+                    markLine: {
+                        data: [
+                            { yAxis: 150, label: { formatter: 'Warning Level' }, lineStyle: { color: '#f59e0b' } },
+                            { yAxis: 200, label: { formatter: 'Critical Level' }, lineStyle: { color: '#ef4444' } }
+                        ]
+                    }
+                }]
+            });
+
+            // Quality Score Chart
+            qualityChart = echarts.init(document.getElementById('quality-chart'));
+            qualityChart.setOption({
+                tooltip: { trigger: 'axis' },
+                grid: { left: '8%', right: '5%', bottom: '15%', top: '10%' },
+                xAxis: { type: 'category', data: [], axisLabel: { rotate: 45 } },
+                yAxis: { type: 'value', min: 0, max: 100, name: 'Quality Score' },
+                series: [{
+                    type: 'line',
+                    data: [],
+                    smooth: true,
+                    areaStyle: {
+                        color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                            { offset: 0, color: 'rgba(37, 99, 235, 0.8)' },
+                            { offset: 1, color: 'rgba(37, 99, 235, 0.1)' }
+                        ])
+                    },
+                    itemStyle: { color: '#2563eb' },
+                    markLine: {
+                        data: [
+                            { yAxis: 90, label: { formatter: 'Grade A' }, lineStyle: { color: '#10b981' } },
+                            { yAxis: 75, label: { formatter: 'Grade B' }, lineStyle: { color: '#3b82f6' } },
+                            { yAxis: 60, label: { formatter: 'Grade C' }, lineStyle: { color: '#f59e0b' } }
+                        ]
+                    }
+                }]
+            });
+        }
+
+        // Update charts
+        function updateCharts(sensorData, analysis) {
+            const time = new Date().toLocaleTimeString();
+            
+            chartData.timestamps.push(time);
+            chartData.ph.push(sensorData.ph);
+            chartData.temperature.push(sensorData.temperature);
+            chartData.turbidity.push(sensorData.turbidity);
+            chartData.tds.push(sensorData.tds);
+            chartData.gas.push(sensorData.gas);
+            
+            // Keep only last 20 points
+            const maxPoints = 20;
+            if (chartData.timestamps.length > maxPoints) {
+                chartData.timestamps.shift();
+                chartData.ph.shift();
+                chartData.temperature.shift();
+                chartData.turbidity.shift();
+                chartData.tds.shift();
+                chartData.gas.shift();
+            }
+            
+            // Update all charts
+            phChart.setOption({
+                xAxis: { data: chartData.timestamps },
+                series: [{ data: chartData.ph }]
+            });
+
+            tempChart.setOption({
+                xAxis: { data: chartData.timestamps },
+                series: [{ data: chartData.temperature }]
+            });
+
+            turbidityTdsChart.setOption({
+                xAxis: { data: chartData.timestamps },
+                series: [
+                    { data: chartData.turbidity },
+                    { data: chartData.tds }
+                ]
+            });
+
+            gasChart.setOption({
+                xAxis: { data: chartData.timestamps },
+                series: [{ data: chartData.gas }]
+            });
+
+            // Update quality chart if analysis is available
+            if (analysis && analysis.score) {
+                const qualityScores = chartData.timestamps.map((t, i) => {
+                    return analysis.score; // For now, use current score
+                });
+                qualityChart.setOption({
+                    xAxis: { data: chartData.timestamps },
+                    series: [{ data: qualityScores }]
+                });
+            }
+        }
+
+        // Update UI with sensor data
+        function updateUI(sensorData, analysis) {
+            updateCount++;
+            document.getElementById('update-count').textContent = updateCount;
+            
+            // Store reading in trend analyzer
+            if (window.TrendAnalyzer) {
+                window.TrendAnalyzer.storeReading(sensorData);
+            }
+            
+            // Update sensor values
+            document.getElementById('ph-value').textContent = sensorData.ph.toFixed(2);
+            document.getElementById('temp-value').textContent = sensorData.temperature.toFixed(1) + '°C';
+            document.getElementById('turbidity-value').textContent = sensorData.turbidity.toFixed(1) + ' NTU';
+            document.getElementById('tds-value').textContent = sensorData.tds.toFixed(0) + ' ppm';
+            document.getElementById('gas-value').textContent = sensorData.gas.toFixed(0);
+            document.getElementById('overall-quality').textContent = sensorData.quality;
+            
+            // Update status badges
+            if (analysis && analysis.parameters) {
+                updateStatus('ph', analysis.parameters.ph.status);
+                updateStatus('temp', analysis.parameters.temperature.status);
+                updateStatus('turbidity', analysis.parameters.turbidity.status);
+                updateStatus('tds', analysis.parameters.tds.status);
+                updateStatus('gas', analysis.parameters.gas.status);
+            }
+            
+            // Update quality grade
+            if (analysis && analysis.qualityGrade) {
+                const grade = analysis.qualityGrade;
+                document.getElementById('quality-grade').textContent = grade.grade;
+                document.getElementById('quality-grade').className = `grade-display grade-${grade.grade.toLowerCase()}`;
+                document.getElementById('quality-label').textContent = grade.label;
+                document.getElementById('quality-score').textContent = `Score: ${Math.round(analysis.score)}/100`;
+            }
+            
+            // Update progress bars
+            updateProgressBar('ph', sensorData.ph, 6.0, 7.0);
+            updateProgressBar('temp', sensorData.temperature, 0, 40);
+            updateProgressBar('turbidity', sensorData.turbidity, 0, 50);
+            updateProgressBar('tds', sensorData.tds, 0, 2000);
+            updateProgressBar('gas', sensorData.gas, 0, 300);
+            
+            // Add flash effect
+            flashCard('ph');
+            flashCard('temp');
+            flashCard('turbidity');
+            flashCard('tds');
+            flashCard('gas');
+            
+            // Update charts
+            updateCharts(sensorData, analysis);
+            
+            // Update trend analysis (every 5 readings to avoid overhead)
+            if (updateCount % 5 === 0) {
+                updateTrendAnalysis();
+            }
+            
+            // Update recommendations
+            if (analysis && analysis.recommendations) {
+                updateRecommendations(analysis);
+            }
+            
+            // Update history list
+            addToHistoryList(sensorData, analysis);
+        }
+
+        function updateRecommendations(analysis) {
+            const container = document.getElementById('ai-recommendations');
+            
+            if (!analysis.recommendations || analysis.recommendations.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-green-50 p-6 rounded-lg text-center">
+                        <svg class="w-16 h-16 mx-auto text-green-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <h4 class="text-xl font-bold text-green-900 mb-2">Excellent Quality!</h4>
+                        <p class="text-green-700">All parameters are within optimal ranges. No immediate actions required.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            let html = '<div class="space-y-4">';
+            
+            analysis.recommendations.forEach((rec, index) => {
+                const priorityColors = {
+                    critical: { bg: 'bg-red-50', text: 'text-red-900', border: 'border-red-200', badge: 'bg-red-600' },
+                    high: { bg: 'bg-orange-50', text: 'text-orange-900', border: 'border-orange-200', badge: 'bg-orange-600' },
+                    medium: { bg: 'bg-yellow-50', text: 'text-yellow-900', border: 'border-yellow-200', badge: 'bg-yellow-600' },
+                    low: { bg: 'bg-blue-50', text: 'text-blue-900', border: 'border-blue-200', badge: 'bg-blue-600' }
+                };
+                
+                const colors = priorityColors[rec.priority] || priorityColors.medium;
+                
+                html += `
+                    <div class="${colors.bg} border-l-4 ${colors.border} p-6 rounded-lg">
+                        <div class="flex items-start justify-between mb-3">
+                            <div class="flex items-center space-x-3">
+                                <span class="${colors.badge} text-white text-xs font-bold px-3 py-1 rounded-full uppercase">
+                                    ${rec.priority} Priority
+                                </span>
+                                <h4 class="text-lg font-bold ${colors.text}">${rec.category}</h4>
+                            </div>
+                        </div>
+                        <p class="${colors.text} mb-4 text-base leading-relaxed">${rec.action}</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                            <div>
+                                <span class="font-semibold ${colors.text}">Expected Impact:</span>
+                                <span class="ml-2 ${colors.text}">${rec.expectedImpact}</span>
+                            </div>
+                            <div>
+                                <span class="font-semibold ${colors.text}">Timeframe:</span>
+                                <span class="ml-2 ${colors.text}">${rec.timeframe}</span>
+                            </div>
+                        </div>`;
+                
+                // Add step-by-step instructions if available
+                if (rec.steps && rec.steps.length > 0) {
+                    html += `
+                        <details class="mt-4">
+                            <summary class="cursor-pointer font-semibold ${colors.text} hover:underline">
+                                View Step-by-Step Instructions (${rec.steps.length} steps)
+                            </summary>
+                            <ol class="mt-3 space-y-2 list-decimal list-inside ${colors.text}">`;
+                    rec.steps.forEach(step => {
+                        html += `<li class="pl-2">${step}</li>`;
+                    });
+                    html += `</ol>
+                        </details>`;
+                }
+                
+                html += `</div>`;
+            });
+            
+            // Add insights if available
+            if (analysis.insights && analysis.insights.length > 0) {
+                html += '<div class="mt-6 bg-indigo-50 p-6 rounded-lg">';
+                html += '<h4 class="text-lg font-bold text-indigo-900 mb-4">🔍 AI Insights</h4>';
+                html += '<ul class="space-y-3">';
+                analysis.insights.forEach(insight => {
+                    html += `<li class="flex items-start space-x-3">
+                        <svg class="w-5 h-5 text-indigo-600 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                        </svg>
+                        <span class="text-indigo-800 text-sm">${insight.message}</span>
+                    </li>`;
+                });
+                html += '</ul></div>';
+            }
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // Update trend analysis section
+        function updateTrendAnalysis() {
+            if (!window.TrendAnalyzer) return;
+            
+            const timeframe = document.getElementById('trend-timeframe')?.value || '24hours';
+            const trendReport = window.TrendAnalyzer.generateTrendReport(timeframe);
+            const dashboardMetrics = window.TrendAnalyzer.getDashboardMetrics();
+            
+            // Update quality trend card
+            const qualityTrend = trendReport.qualityTrend;
+            if (qualityTrend && qualityTrend.trend !== 'insufficient_data') {
+                const trendIcons = {
+                    increasing: '📈',
+                    decreasing: '📉',
+                    stable: '➡️'
+                };
+                
+                const trendColors = {
+                    increasing: 'text-green-700',
+                    decreasing: 'text-red-700',
+                    stable: 'text-blue-700'
+                };
+                
+                document.getElementById('quality-trend-value').textContent = 
+                    `${trendIcons[qualityTrend.trend]} ${qualityTrend.trend.charAt(0).toUpperCase() + qualityTrend.trend.slice(1)}`;
+                document.getElementById('quality-trend-value').className = 
+                    `text-3xl font-bold mb-2 ${trendColors[qualityTrend.trend]}`;
+                document.getElementById('quality-trend-text').textContent = qualityTrend.message;
+            }
+            
+            // Update anomalies card
+            const anomalyCount = trendReport.anomalies.length;
+            document.getElementById('anomalies-count').textContent = anomalyCount;
+            if (anomalyCount > 0) {
+                const severityCount = trendReport.anomalies.filter(a => a.severity === 'critical').length;
+                document.getElementById('anomalies-text').textContent = 
+                    severityCount > 0 ? `${severityCount} critical anomalies!` : `${anomalyCount} anomalies detected`;
+            } else {
+                document.getElementById('anomalies-text').textContent = 'All parameters normal';
+            }
+            
+            // Update data quality card
+            document.getElementById('data-quality-value').textContent = 
+                dashboardMetrics.dataQuality.charAt(0).toUpperCase() + dashboardMetrics.dataQuality.slice(1);
+            document.getElementById('total-readings').textContent = dashboardMetrics.totalReadings;
+            
+            // Update parameter statistics
+            updateParameterStats(trendReport);
+            
+            // Update predictions
+            updatePredictions(trendReport);
+        }
+
+        function updateParameterStats(trendReport) {
+            const statsContainer = document.getElementById('parameter-stats');
+            if (!statsContainer) return;
+            
+            const parameters = [
+                { key: 'ph', name: 'pH Level', unit: '', optimal: '6.4-6.7', color: 'blue' },
+                { key: 'temperature', name: 'Temperature', unit: '°C', optimal: '15-30°C', color: 'orange' },
+                { key: 'turbidity', name: 'Turbidity', unit: 'NTU', optimal: '10-25 NTU', color: 'teal' },
+                { key: 'tds', name: 'TDS', unit: 'ppm', optimal: '300-600 ppm', color: 'purple' },
+                { key: 'gas', name: 'Gas Level', unit: '', optimal: '<150', color: 'indigo' }
+            ];
+            
+            let html = '';
+            parameters.forEach(param => {
+                const stats = trendReport.parameters[param.key];
+                if (!stats) return;
+                
+                const trendIcon = stats.trend.direction === 'increasing' ? '↗️' : 
+                                 stats.trend.direction === 'decreasing' ? '↘️' : '→';
+                const stabilityBadge = stats.stability === 'very_stable' ? '🟢 Very Stable' :
+                                      stats.stability === 'stable' ? '🟡 Stable' :
+                                      stats.stability === 'moderate' ? '🟠 Moderate' : '🔴 Unstable';
+                
+                html += `
+                    <div class="bg-${param.color}-50 p-4 rounded-lg border border-${param.color}-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <h5 class="font-semibold text-${param.color}-900 text-sm">${param.name}</h5>
+                            <span class="text-xs text-${param.color}-700">${trendIcon} ${stats.trend.direction}</span>
+                        </div>
+                        <p class="text-2xl font-bold text-${param.color}-900 mb-1">
+                            ${stats.current.toFixed(param.key === 'tds' ? 0 : 2)}${param.unit}
+                        </p>
+                        <div class="text-xs text-${param.color}-700 space-y-1">
+                            <p>Mean: ${stats.mean.toFixed(2)}${param.unit} | Range: ${stats.min.toFixed(1)}-${stats.max.toFixed(1)}</p>
+                            <p class="text-xs">${stabilityBadge}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            statsContainer.innerHTML = html;
+        }
+
+        function updatePredictions(trendReport) {
+            const predictionsGrid = document.getElementById('predictions-grid');
+            if (!predictionsGrid || !trendReport.predictions) return;
+            
+            const parameters = [
+                { key: 'ph', name: 'pH', unit: '', icon: '🧪' },
+                { key: 'temperature', name: 'Temperature', unit: '°C', icon: '🌡️' },
+                { key: 'turbidity', name: 'Turbidity', unit: 'NTU', icon: '💧' },
+                { key: 'tds', name: 'TDS', unit: 'ppm', icon: '⚡' },
+                { key: 'gas', name: 'Gas', unit: '', icon: '💨' }
+            ];
+            
+            let html = '';
+            parameters.forEach(param => {
+                const pred = trendReport.predictions[param.key];
+                if (!pred) return;
+                
+                const confidence = (pred.confidence * 100).toFixed(0);
+                const confidenceColor = confidence > 80 ? 'green' : confidence > 60 ? 'yellow' : 'red';
+                
+                html += `
+                    <div class="bg-white p-4 rounded-lg border border-gray-200">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-2xl">${param.icon}</span>
+                            <span class="text-xs font-semibold px-2 py-1 bg-${confidenceColor}-100 text-${confidenceColor}-800 rounded-full">
+                                ${confidence}% confidence
+                            </span>
+                        </div>
+                        <h5 class="font-semibold text-gray-900 text-sm mb-1">${param.name}</h5>
+                        <p class="text-xl font-bold text-gray-900">
+                            ${pred.predicted.toFixed(param.key === 'tds' ? 0 : 2)}${param.unit}
+                        </p>
+                        <p class="text-xs text-gray-600 mt-1">
+                            Range: ${pred.range.lower.toFixed(1)}-${pred.range.upper.toFixed(1)}${param.unit}
+                        </p>
+                    </div>
+                `;
+            });
+            
+            predictionsGrid.innerHTML = html || '<p class="text-gray-600 text-center col-span-full">Insufficient data for predictions</p>';
+        }
+
+        function updateStatus(param, status) {
+            const element = document.getElementById(`${param}-status`);
+            element.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+            element.className = `text-sm font-medium status-${status}`;
+        }
+
+        function updateProgressBar(param, value, min, max) {
+            const percentage = ((value - min) / (max - min)) * 100;
+            const clampedPercentage = Math.max(0, Math.min(100, percentage));
+            document.getElementById(`${param}-bar`).style.width = `${clampedPercentage}%`;
+        }
+
+        function flashCard(param) {
+            const card = document.getElementById(`${param}-card`);
+            card.classList.add('updating');
+            setTimeout(() => card.classList.remove('updating'), 500);
+        }
+
+        function addToHistoryList(sensorData, analysis) {
+            const historyList = document.getElementById('history-list');
+            
+            // Clear placeholder
+            if (historyList.querySelector('p')) {
+                historyList.innerHTML = '';
+            }
+            
+            const time = new Date().toLocaleTimeString();
+            const grade = analysis && analysis.qualityGrade ? analysis.qualityGrade.grade : '-';
+            const score = analysis && analysis.score ? Math.round(analysis.score) : 0;
+            
+            const entry = document.createElement('div');
+            entry.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+            entry.innerHTML = `
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg">
+                        ${grade}
+                    </div>
+                    <div>
+                        <p class="font-semibold text-gray-900">Quality Score: ${score}/100</p>
+                        <p class="text-sm text-gray-600">${time} • pH: ${sensorData.ph.toFixed(2)} • Temp: ${sensorData.temperature.toFixed(1)}°C</p>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <p class="text-sm font-medium text-gray-900">${sensorData.quality}</p>
+                    <p class="text-xs text-gray-500">Firebase Data</p>
+                </div>
+            `;
+            
+            historyList.insertBefore(entry, historyList.firstChild);
+            
+            // Keep only last 10 entries
+            while (historyList.children.length > 10) {
+                historyList.removeChild(historyList.lastChild);
+            }
+        }
+
+        // Countdown timer
+        function startCountdown() {
+            countdown = 3;
+            countdownInterval = setInterval(() => {
+                document.getElementById('countdown').textContent = countdown + 's';
+                countdown--;
+                if (countdown < 0) {
+                    countdown = 3;
+                }
+            }, 1000);
+        }
+
+        function stopCountdown() {
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+                countdownInterval = null;
+            }
+            document.getElementById('countdown').textContent = '-';
+        }
+
+        // Event listeners
+        document.getElementById('start-btn').addEventListener('click', () => {
+            if (window.milkAnalyzer) {
+                window.milkAnalyzer.start();
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('stop-btn').disabled = false;
+                document.getElementById('status-text').textContent = 'Running';
+                document.getElementById('status-text').className = 'text-lg font-bold text-green-600';
+                startCountdown();
+            }
+        });
+
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            if (window.milkAnalyzer) {
+                window.milkAnalyzer.stop();
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('stop-btn').disabled = true;
+                document.getElementById('status-text').textContent = 'Stopped';
+                document.getElementById('status-text').className = 'text-lg font-bold text-gray-400';
+                stopCountdown();
+            }
+        });
+
+        // Report generation buttons
+        document.getElementById('generate-report-btn').addEventListener('click', () => {
+            if (window.reportGenerator) {
+                window.reportGenerator.openPrintableReport();
+            }
+        });
+
+        document.getElementById('export-csv-btn').addEventListener('click', () => {
+            if (window.reportGenerator) {
+                window.reportGenerator.exportToCSV();
+            }
+        });
+
+        // Trend timeframe selector
+        const trendTimeframeSelector = document.getElementById('trend-timeframe');
+        if (trendTimeframeSelector) {
+            trendTimeframeSelector.addEventListener('change', () => {
+                updateTrendAnalysis();
+            });
+        }
+
+        // Listen for analysis updates
+        window.addEventListener('milkAnalysisUpdate', (event) => {
+            const { sensorData, analysis } = event.detail;
+            updateUI(sensorData, analysis);
+        });
+
+        // Listen for errors
+        window.addEventListener('milkAnalysisError', (event) => {
+            const { error } = event.detail;
+            console.error('Analysis error:', error);
+            document.getElementById('connection-status').textContent = 'Error: ' + error;
+            document.getElementById('connection-status').previousElementSibling.classList.remove('bg-green-500');
+            document.getElementById('connection-status').previousElementSibling.classList.add('bg-red-500');
+        });
+
+        // Initialize on load
+        window.addEventListener('load', () => {
+            initCharts();
+            
+            // Initialize trend analysis after a short delay
+            setTimeout(() => {
+                if (window.TrendAnalyzer) {
+                    updateTrendAnalysis();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

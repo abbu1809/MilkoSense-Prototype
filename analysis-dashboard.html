@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Dashboard - MilkoSense</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .nav-link {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover {
+            color: #2563eb;
+        }
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -4px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #2563eb;
+            border-radius: 1px;
+        }
+        .analysis-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        .analysis-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .metric-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+        }
+        .metric-card:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+        .grade-badge-large {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: white;
+        }
+        .grade-a { background: linear-gradient(135deg, #10b981, #059669); }
+        .grade-b { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .grade-c { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .grade-d { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .stat-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            padding: 1.5rem;
+        }
+        /* Dark Mode Styles */
+        [data-theme="dark"] body { background-color: #0f172a; color: #e2e8f0; }
+        [data-theme="dark"] .bg-white { background-color: #1e293b; }
+        [data-theme="dark"] .bg-gray-50 { background-color: #0f172a; }
+        [data-theme="dark"] .bg-gray-100 { background-color: #1e293b; }
+        [data-theme="dark"] .text-gray-900 { color: #e2e8f0; }
+        [data-theme="dark"] .text-gray-600 { color: #94a3b8; }
+        [data-theme="dark"] nav { background-color: rgba(15, 23, 42, 0.9); border-color: #334155; }
+        [data-theme="dark"] .border-gray-200 { border-color: #334155; }
+        [data-theme="dark"] .metric-card { background-color: #1e293b; }
+        [data-theme="dark"] .analysis-card { background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900">
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 bg-white/90 backdrop-blur-md border-b border-gray-200 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">M</span>
+                    </div>
+                    <span class="text-xl font-bold text-gradient">MilkoSense</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="index.html" class="nav-link text-gray-600 font-medium">Home</a>
+                    <a href="about.html" class="nav-link text-gray-600 font-medium">About</a>
+                    <a href="sensors.html" class="nav-link text-gray-600 font-medium">Sensors</a>
+                    <a href="analysis.html" class="nav-link text-gray-600 font-medium">Analysis</a>
+                    <a href="colorimetric.html" class="nav-link text-gray-600 font-medium">Colorimetric</a>
+                    <a href="dashboard.html" class="nav-link text-gray-600 font-medium">Dashboard</a>
+                    <a href="analysis-dashboard.html" class="nav-link active text-gray-900 font-medium">Analysis Dashboard</a>
+                    <a href="recommendations.html" class="nav-link text-gray-600 font-medium">Recommendations</a>
+                    <a href="team.html" class="nav-link text-gray-600 font-medium">Team</a>
+                    <a href="contact.html" class="nav-link text-gray-600 font-medium">Contact</a>
+                </div>
+                <button class="md:hidden p-2 rounded-md text-gray-600 hover:text-gray-900">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header Section -->
+    <section class="pt-24 pb-12 px-4 sm:px-6 lg:px-8 bg-gradient-to-br from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-5xl font-bold text-gray-900 mb-4">
+                        Analysis <span class="text-blue-600">Dashboard</span>
+                    </h1>
+                    <p class="text-xl text-gray-600 max-w-3xl">
+                        Comprehensive analysis insights, quality trends, and statistical overview of milk quality assessments.
+                    </p>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <select id="analysis-period" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="7d">Last 7 Days</option>
+                        <option value="30d" selected>Last 30 Days</option>
+                        <option value="90d">Last 90 Days</option>
+                        <option value="1y">Last Year</option>
+                    </select>
+                    <button onclick="exportAnalysis()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        Export Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Analysis Summary Section -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="analysis-card p-8 rounded-2xl mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">AI Analysis Summary</h2>
+                        <p class="text-gray-600">Comprehensive analysis powered by Random Forest ML model (99.2% accuracy)</p>
+                    </div>
+                    <div class="px-4 py-2 bg-purple-100 rounded-lg">
+                        <div class="text-sm text-purple-600 font-medium">Model Version 2.1.0</div>
+                    </div>
+                </div>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-blue-50 p-6 rounded-xl">
+                        <div class="text-sm text-blue-600 font-medium mb-2">Total Samples Analyzed</div>
+                        <div class="text-3xl font-bold text-blue-900" id="total-analyses">1,247</div>
+                        <div class="text-sm text-blue-700 mt-2">+156 this month</div>
+                    </div>
+                    <div class="bg-green-50 p-6 rounded-xl">
+                        <div class="text-sm text-green-600 font-medium mb-2">Average Quality Score</div>
+                        <div class="text-3xl font-bold text-green-900" id="overall-score">92.5</div>
+                        <div class="text-sm text-green-700 mt-2">+2.3% improvement</div>
+                    </div>
+                    <div class="bg-yellow-50 p-6 rounded-xl">
+                        <div class="text-sm text-yellow-600 font-medium mb-2">AI Confidence Level</div>
+                        <div class="text-3xl font-bold text-yellow-900">98.7%</div>
+                        <div class="text-sm text-yellow-700 mt-2">High reliability</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Metrics -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Performance Metrics</h2>
+                <p class="text-gray-600">Key indicators and quality distribution</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Grade A Percentage -->
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Grade A Samples</h3>
+                        <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2">87.0%</div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-green-500 h-2 rounded-full" style="width: 87%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600">1,085 samples</span>
+                    </div>
+                </div>
+
+                <!-- Grade B Percentage -->
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Grade B Samples</h3>
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-blue-600 mb-2">11.0%</div>
+                    <div class="flex items-center space-x-2">
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="bg-blue-500 h-2 rounded-full" style="width: 11%"></div>
+                        </div>
+                        <span class="text-sm text-gray-600">137 samples</span>
+                    </div>
+                </div>
+
+                <!-- Average Grade -->
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Average Grade</h3>
+                        <div class="grade-badge-large grade-a">A</div>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2">A</div>
+                    <div class="text-sm text-gray-600">87% Grade A samples</div>
+                </div>
+
+                <!-- Adulteration Rate -->
+                <div class="metric-card">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-sm font-medium text-gray-600">Adulteration Rate</h3>
+                        <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                        </svg>
+                    </div>
+                    <div class="text-3xl font-bold text-green-600 mb-2" id="adulteration-rate">2.1%</div>
+                    <div class="text-sm text-gray-600">-0.8% from last month</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quality Distribution & Trends -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="grid lg:grid-cols-2 gap-8">
+                <!-- Quality Distribution Chart -->
+                <div class="analysis-card p-6 rounded-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Quality Grade Distribution</h3>
+                        <button onclick="toggleChartType('distribution')" class="px-3 py-1 text-sm bg-gray-100 rounded hover:bg-gray-200 transition-colors">
+                            <span id="dist-chart-type">Pie</span>
+                        </button>
+                    </div>
+                    <div id="distribution-chart" style="height: 350px; min-height: 350px; width: 100%;"></div>
+                    <div id="distribution-chart-error" class="hidden text-center text-red-600 py-8">
+                        <p>Chart failed to load. Please refresh the page.</p>
+                    </div>
+                </div>
+
+                <!-- Quality Trends Over Time -->
+                <div class="analysis-card p-6 rounded-2xl">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-xl font-bold text-gray-900">Quality Trends</h3>
+                        <select id="trend-metric" class="px-3 py-1 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="grade">Grade Distribution</option>
+                            <option value="score">Quality Score</option>
+                            <option value="adulteration">Adulteration Rate</option>
+                        </select>
+                    </div>
+                    <div id="trends-chart" style="height: 350px; min-height: 350px; width: 100%;"></div>
+                    <div id="trends-chart-error" class="hidden text-center text-red-600 py-8">
+                        <p>Chart failed to load. Please refresh the page.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Parameter Analysis -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Parameter Analysis</h2>
+                <p class="text-gray-600">Radar chart comparing average vs optimal parameter values</p>
+            </div>
+            <div class="analysis-card p-6 rounded-2xl mb-8">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Parameter Performance Radar</h3>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full"></div>
+                            <span>Average</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                            <span>Optimal</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="parameter-analysis-chart" style="height: 450px; min-height: 450px; width: 100%;"></div>
+                <div id="parameter-chart-error" class="hidden text-center text-red-600 py-8">
+                    <p>Chart failed to load. Please refresh the page.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistical Insights -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-white">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Statistical Insights</h2>
+                <p class="text-gray-600">Detailed parameter statistics and distributions</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-6">
+                <!-- pH Statistics -->
+                <div class="stat-card">
+                    <h4 class="font-bold text-gray-900 mb-4">pH Level Statistics</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Average:</span>
+                            <span class="font-semibold">6.68</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Min:</span>
+                            <span class="font-semibold">6.42</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Max:</span>
+                            <span class="font-semibold">6.89</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Std Dev:</span>
+                            <span class="font-semibold">0.12</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="text-sm text-gray-600 mb-2">Distribution</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 85%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">85% within optimal range</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Temperature Statistics -->
+                <div class="stat-card">
+                    <h4 class="font-bold text-gray-900 mb-4">Temperature Statistics</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Average:</span>
+                            <span class="font-semibold">18.5°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Min:</span>
+                            <span class="font-semibold">15.2°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Max:</span>
+                            <span class="font-semibold">22.8°C</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Std Dev:</span>
+                            <span class="font-semibold">1.8°C</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="text-sm text-gray-600 mb-2">Distribution</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 78%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">78% within optimal range</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TDS Statistics -->
+                <div class="stat-card">
+                    <h4 class="font-bold text-gray-900 mb-4">TDS Statistics</h4>
+                    <div class="space-y-3">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Average:</span>
+                            <span class="font-semibold">865 ppm</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Min:</span>
+                            <span class="font-semibold">742 ppm</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Max:</span>
+                            <span class="font-semibold">1,128 ppm</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Std Dev:</span>
+                            <span class="font-semibold">98 ppm</span>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-200">
+                            <div class="text-sm text-gray-600 mb-2">Distribution</div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 72%"></div>
+                            </div>
+                            <div class="text-xs text-gray-500 mt-1">72% within optimal range</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparative Analysis -->
+    <section class="py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold text-gray-900 mb-2">Comparative Analysis</h2>
+                <p class="text-gray-600">This month vs last month vs industry average</p>
+            </div>
+            <div class="analysis-card p-6 rounded-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-bold text-gray-900">Performance Comparison</h3>
+                    <div class="flex items-center space-x-4 text-sm">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-blue-500 rounded"></div>
+                            <span>This Month</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-green-500 rounded"></div>
+                            <span>Last Month</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                            <span>Industry Avg</span>
+                        </div>
+                    </div>
+                </div>
+                <div id="comparative-chart" style="height: 450px; min-height: 450px; width: 100%;"></div>
+                <div id="comparative-chart-error" class="hidden text-center text-red-600 py-8">
+                    <p>Chart failed to load. Please refresh the page.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-7xl mx-auto text-center">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+                <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-blue-500 rounded-lg flex items-center justify-center">
+                    <span class="text-white font-bold text-sm">M</span>
+                </div>
+                <span class="text-xl font-bold">MilkoSense</span>
+            </div>
+            <p class="text-gray-400 mb-6">
+                AI-Assisted Milk Quality Testing System - Ensuring Safety Through Innovation
+            </p>
+            <p class="text-sm text-gray-500">
+                © 2025 MilkoSense Project. All rights reserved. | College Project Prototype
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        let distributionChart = null;
+        let trendsChart = null;
+        let parameterChart = null;
+        let comparativeChart = null;
+        let currentChartType = 'pie';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait for ECharts to be available
+            function waitForECharts() {
+                if (typeof echarts !== 'undefined') {
+                    // Wait a bit for DOM to be fully ready
+                    setTimeout(() => {
+                        initializeCharts();
+                        animateMetrics();
+                    }, 300);
+                } else {
+                    console.log('Waiting for ECharts library...');
+                    setTimeout(waitForECharts, 100);
+                }
+            }
+            waitForECharts();
+        });
+
+        function initializeCharts() {
+            console.log('Initializing analysis dashboard charts...');
+            
+            // Quality Distribution Chart
+            const distDom = document.getElementById('distribution-chart');
+            if (!distDom) {
+                console.error('Distribution chart container not found');
+                setTimeout(initializeCharts, 500);
+                return;
+            }
+            
+            try {
+                distributionChart = echarts.init(distDom);
+                if (!distributionChart) {
+                    console.error('Failed to initialize distribution chart');
+                    document.getElementById('distribution-chart-error')?.classList.remove('hidden');
+                    return;
+                }
+                distributionChart.setOption({
+                tooltip: {
+                    trigger: 'item',
+                    formatter: '{a} <br/>{b}: {c} ({d}%)'
+                },
+                legend: {
+                    orient: 'vertical',
+                    left: 'left',
+                    bottom: 0
+                },
+                series: [{
+                    name: 'Quality Grade',
+                    type: 'pie',
+                    radius: ['40%', '70%'],
+                    avoidLabelOverlap: false,
+                    itemStyle: {
+                        borderRadius: 10,
+                        borderColor: '#fff',
+                        borderWidth: 2
+                    },
+                    label: {
+                        show: true,
+                        formatter: '{b}: {d}%'
+                    },
+                    emphasis: {
+                        label: {
+                            show: true,
+                            fontSize: 16,
+                            fontWeight: 'bold'
+                        }
+                    },
+                    data: [
+                        { value: 1085, name: 'Grade A', itemStyle: { color: '#10b981' } },
+                        { value: 137, name: 'Grade B', itemStyle: { color: '#3b82f6' } },
+                        { value: 25, name: 'Grade C', itemStyle: { color: '#f59e0b' } },
+                        { value: 0, name: 'Grade D', itemStyle: { color: '#ef4444' } }
+                    ]
+                }]);
+                console.log('✅ Distribution chart initialized');
+            } catch (error) {
+                console.error('❌ Error initializing distribution chart:', error);
+                document.getElementById('distribution-chart-error')?.classList.remove('hidden');
+            }
+
+            // Trends Chart
+            const trendsDom = document.getElementById('trends-chart');
+            if (!trendsDom) {
+                console.error('Trends chart container not found');
+                return;
+            }
+            
+            try {
+                trendsChart = echarts.init(trendsDom);
+                if (!trendsChart) {
+                    console.error('Failed to initialize trends chart');
+                    document.getElementById('trends-chart-error')?.classList.remove('hidden');
+                    return;
+                }
+            const dates = [];
+            const gradeA = [];
+            const gradeB = [];
+            const gradeC = [];
+            
+            for (let i = 29; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                dates.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                gradeA.push(Math.floor(Math.random() * 20 + 80));
+                gradeB.push(Math.floor(Math.random() * 15 + 10));
+                gradeC.push(Math.floor(Math.random() * 5 + 2));
+            }
+            
+            trendsChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: {
+                    data: ['Grade A', 'Grade B', 'Grade C'],
+                    bottom: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: dates
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Percentage (%)'
+                },
+                series: [
+                    {
+                        name: 'Grade A',
+                        type: 'line',
+                        stack: 'Total',
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#10b981' },
+                        data: gradeA
+                    },
+                    {
+                        name: 'Grade B',
+                        type: 'line',
+                        stack: 'Total',
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#3b82f6' },
+                        data: gradeB
+                    },
+                    {
+                        name: 'Grade C',
+                        type: 'line',
+                        stack: 'Total',
+                        smooth: true,
+                        areaStyle: { opacity: 0.3 },
+                        itemStyle: { color: '#f59e0b' },
+                        data: gradeC
+                    }
+                ]);
+                console.log('✅ Trends chart initialized');
+            } catch (error) {
+                console.error('❌ Error initializing trends chart:', error);
+                document.getElementById('trends-chart-error')?.classList.remove('hidden');
+            }
+
+            // Parameter Analysis Chart
+            const paramDom = document.getElementById('parameter-analysis-chart');
+            if (!paramDom) {
+                console.error('Parameter chart container not found');
+                return;
+            }
+            
+            try {
+                parameterChart = echarts.init(paramDom);
+                if (!parameterChart) {
+                    console.error('Failed to initialize parameter chart');
+                    document.getElementById('parameter-chart-error')?.classList.remove('hidden');
+                    return;
+                }
+            parameterChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: {
+                    data: ['pH', 'Temperature', 'Turbidity', 'TDS'],
+                    bottom: 0
+                },
+                radar: {
+                    indicator: [
+                        { name: 'pH', max: 7 },
+                        { name: 'Temperature', max: 25 },
+                        { name: 'Turbidity', max: 25 },
+                        { name: 'TDS', max: 1200 }
+                    ],
+                    radius: '65%'
+                },
+                series: [{
+                    name: 'Parameter Analysis',
+                    type: 'radar',
+                    data: [
+                        {
+                            value: [6.68, 18.5, 15.2, 865],
+                            name: 'Average',
+                            itemStyle: { color: '#2563eb' },
+                            areaStyle: { opacity: 0.3 }
+                        },
+                        {
+                            value: [6.75, 19.2, 14.8, 890],
+                            name: 'Optimal',
+                            itemStyle: { color: '#10b981' },
+                            areaStyle: { opacity: 0.2 }
+                        }
+                    ]
+                }]);
+                console.log('✅ Parameter chart initialized');
+            } catch (error) {
+                console.error('❌ Error initializing parameter chart:', error);
+                document.getElementById('parameter-chart-error')?.classList.remove('hidden');
+            }
+
+            // Comparative Chart
+            const compDom = document.getElementById('comparative-chart');
+            if (!compDom) {
+                console.error('Comparative chart container not found');
+                return;
+            }
+            
+            try {
+                comparativeChart = echarts.init(compDom);
+                if (!comparativeChart) {
+                    console.error('Failed to initialize comparative chart');
+                    document.getElementById('comparative-chart-error')?.classList.remove('hidden');
+                    return;
+                }
+            comparativeChart.setOption({
+                tooltip: { trigger: 'axis' },
+                legend: {
+                    data: ['This Month', 'Last Month', 'Industry Average'],
+                    bottom: 0
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['pH', 'Temperature', 'Turbidity', 'TDS', 'Gas']
+                },
+                yAxis: {
+                    type: 'value',
+                    name: 'Normalized Score'
+                },
+                series: [
+                    {
+                        name: 'This Month',
+                        type: 'bar',
+                        itemStyle: { color: '#2563eb' },
+                        data: [92, 88, 85, 90, 87]
+                    },
+                    {
+                        name: 'Last Month',
+                        type: 'bar',
+                        itemStyle: { color: '#10b981' },
+                        data: [89, 85, 82, 87, 84]
+                    },
+                    {
+                        name: 'Industry Average',
+                        type: 'line',
+                        itemStyle: { color: '#f59e0b' },
+                        data: [85, 80, 78, 82, 80]
+                    }
+                ]);
+                console.log('✅ Comparative chart initialized');
+            } catch (error) {
+                console.error('❌ Error initializing comparative chart:', error);
+                document.getElementById('comparative-chart-error')?.classList.remove('hidden');
+            }
+
+            // Make charts responsive
+            window.addEventListener('resize', () => {
+                if (distributionChart) distributionChart.resize();
+                if (trendsChart) trendsChart.resize();
+                if (parameterChart) parameterChart.resize();
+                if (comparativeChart) comparativeChart.resize();
+            });
+            
+            console.log('All charts initialization completed');
+            
+            // Verify all charts are initialized
+            if (distributionChart && trendsChart && parameterChart && comparativeChart) {
+                console.log('✅ All charts initialized successfully');
+            } else {
+                console.warn('⚠️ Some charts failed to initialize');
+            }
+        }
+
+        function toggleChartType(type) {
+            if (type === 'distribution') {
+                currentChartType = currentChartType === 'pie' ? 'bar' : 'pie';
+                document.getElementById('dist-chart-type').textContent = currentChartType === 'pie' ? 'Bar' : 'Pie';
+                
+                if (currentChartType === 'bar') {
+                    distributionChart.setOption({
+                        series: [{
+                            type: 'bar',
+                            data: [
+                                { value: 1085, name: 'Grade A', itemStyle: { color: '#10b981' } },
+                                { value: 137, name: 'Grade B', itemStyle: { color: '#3b82f6' } },
+                                { value: 25, name: 'Grade C', itemStyle: { color: '#f59e0b' } }
+                            ]
+                        }],
+                        xAxis: { type: 'category', data: ['Grade A', 'Grade B', 'Grade C'] },
+                        yAxis: { type: 'value' },
+                        legend: { show: false }
+                    });
+                } else {
+                    distributionChart.setOption({
+                        series: [{
+                            type: 'pie',
+                            radius: ['40%', '70%']
+                        }],
+                        legend: { show: true }
+                    });
+                }
+            }
+        }
+
+        function animateMetrics() {
+            anime({
+                targets: '#overall-score',
+                innerHTML: [0, 92.5],
+                duration: 2000,
+                easing: 'easeOutQuart',
+                round: 10
+            });
+            
+            anime({
+                targets: '#total-analyses',
+                innerHTML: [0, 1247],
+                duration: 2000,
+                easing: 'easeOutQuart',
+                round: 1
+            });
+        }
+
+        function exportAnalysis() {
+            const report = {
+                period: document.getElementById('analysis-period').value,
+                overallScore: document.getElementById('overall-score').textContent,
+                totalAnalyses: document.getElementById('total-analyses').textContent,
+                adulterationRate: document.getElementById('adulteration-rate').textContent,
+                timestamp: new Date().toISOString()
+            };
+            
+            const dataStr = JSON.stringify(report, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `milkoSense_analysis_report_${new Date().toISOString()}.json`;
+            link.click();
+            URL.revokeObjectURL(url);
+            
+            if (window.MilkoSense) {
+                MilkoSense.showNotification('Analysis report exported successfully!', 'success');
+            }
+        }
+    </script>
+    <script src="ai-analysis.js"></script>
+    <script src="main.js"></script>
+    <script src="theme.js"></script>
+</body>
+</html>
+
