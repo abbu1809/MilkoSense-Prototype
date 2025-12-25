@@ -165,7 +165,7 @@ http://localhost:8000/
 
 1. **Clone/Download the Project**
 ```bash
-cd "c:\Users\Abhis\Desktop\Coders of Hisar\OKComputer_MilkoSense Prototype"
+cd "MilkoSense-Prototype"
 ```
 
 2. **Start Local Server**
